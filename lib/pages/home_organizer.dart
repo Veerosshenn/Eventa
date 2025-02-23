@@ -1,0 +1,117 @@
+import 'package:flutter/material.dart';
+import 'create_event.dart';
+import 'analytics_admin.dart';
+import 'login.dart';
+import 'ticket_setup.dart';
+
+class HomeOrganizer extends StatelessWidget {
+  final String userRole;
+
+  const HomeOrganizer({super.key, required this.userRole});
+
+  void _signOut(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Organizer Dashboard'),
+        backgroundColor: Colors.redAccent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _signOut(context),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Text(
+              'Welcome, $userRole!',
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 30),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                children: [
+                  _buildCard(
+                    context,
+                    title: 'Event Creation',
+                    icon: Icons.event,
+                    screen: const CreateEventScreen(),
+                  ),
+                  _buildCard(
+                    context,
+                    title: 'View Analytics',
+                    icon: Icons.bar_chart,
+                    screen: const AnalyticsScreen(),
+                  ),
+                  _buildCard(
+                    context,
+                    title: 'Ticket Setup',
+                    icon: Icons.monetization_on,
+                    screen: const TicketSetupScreen(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, {required String title, required IconData icon, required Widget screen}) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => screen),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.redAccent,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.red.withOpacity(0.3),
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: Colors.white),
+            const SizedBox(height: 10),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
