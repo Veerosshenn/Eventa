@@ -1,3 +1,4 @@
+import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -15,11 +16,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBackgroundColor,
       appBar: AppBar(
         title: const Text('Analytics Dashboard'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: buttonColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: grey),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -74,11 +76,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {},
-                icon: const Icon(Icons.download),
+                icon: const Icon(Icons.download, color: grey),
                 label: const Text("Download Report"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: buttonColor,
+                  foregroundColor: grey,
                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
@@ -103,7 +105,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Icon(icon, size: 40, color: Colors.redAccent),
+          Icon(icon, size: 40, color: buttonColor),
           const SizedBox(width: 10),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,18 +165,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   ),
                 ),
                 barGroups: [
-                  BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 8, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 12, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 5, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 8, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 12, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 5, barRods: [BarChartRodData(toY: 5, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 6, barRods: [BarChartRodData(toY: 8, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 7, barRods: [BarChartRodData(toY: 12, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 8, barRods: [BarChartRodData(toY: 5, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 9, barRods: [BarChartRodData(toY: 8, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 10, barRods: [BarChartRodData(toY: 12, color: Colors.blueAccent)]),
-                  BarChartGroupData(x: 11, barRods: [BarChartRodData(toY: 5, color: Colors.blueAccent)]),
+                  BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
+                  BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
+                  BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
+                  BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
+                  BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
+                  BarChartGroupData(x: 5, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
+                  BarChartGroupData(x: 6, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
+                  BarChartGroupData(x: 7, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
+                  BarChartGroupData(x: 8, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
+                  BarChartGroupData(x: 9, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
+                  BarChartGroupData(x: 10, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
+                  BarChartGroupData(x: 11, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
                 ],
               ),
             ),

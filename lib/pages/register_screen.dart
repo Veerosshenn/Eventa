@@ -32,7 +32,7 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Email',
                   labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Color(0xFF2A2A2A),
+                  fillColor: Colors.grey[800],
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -47,7 +47,7 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Name',
                   labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Color(0xFF2A2A2A),
+                  fillColor: Colors.grey[800],
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -63,7 +63,7 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Phone Number',
                   labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Color(0xFF2A2A2A),
+                  fillColor: Colors.grey[800],
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -79,7 +79,7 @@ class RegisterScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Color(0xFF2A2A2A),
+                  fillColor: Colors.grey[800],
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -114,9 +114,9 @@ class RegisterScreen extends StatelessWidget {
                 child: Text(
                   "Register",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: grey,
                   ),
                 ),
               ),
@@ -136,7 +136,6 @@ class RegisterScreen extends StatelessWidget {
                   "Already have an account? Login",
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),
                 ),

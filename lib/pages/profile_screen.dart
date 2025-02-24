@@ -1,5 +1,6 @@
 import 'consts.dart';
 import 'package:flutter/material.dart';
+import 'login.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
@@ -33,6 +34,10 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Logged Out")),
                 );

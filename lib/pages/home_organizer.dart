@@ -1,6 +1,7 @@
+import 'consts.dart';
 import 'package:flutter/material.dart';
 import 'create_event.dart';
-import 'analytics_admin.dart';
+import 'analytics_organizer.dart';
 import 'login.dart';
 import 'ticket_setup.dart';
 
@@ -19,12 +20,13 @@ class HomeOrganizer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBackgroundColor,
       appBar: AppBar(
         title: const Text('Organizer Dashboard'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: buttonColor,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: grey),
             onPressed: () => _signOut(context),
           ),
         ],
@@ -60,7 +62,7 @@ class HomeOrganizer extends StatelessWidget {
                     context,
                     title: 'View Analytics',
                     icon: Icons.bar_chart,
-                    screen: const AnalyticsScreen(),
+                    screen: const AnalyticsOrganizerScreen(),
                   ),
                   _buildCard(
                     context,
@@ -85,11 +87,11 @@ class HomeOrganizer extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.redAccent,
+          color: buttonColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(0.3),
+              color: buttonColor.withOpacity(0.3),
               blurRadius: 10,
               spreadRadius: 2,
             ),
@@ -98,14 +100,14 @@ class HomeOrganizer extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: Colors.white),
+            Icon(icon, size: 40, color: grey),
             const SizedBox(height: 10),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: grey,
               ),
               textAlign: TextAlign.center,
             ),

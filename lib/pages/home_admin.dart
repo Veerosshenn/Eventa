@@ -1,3 +1,4 @@
+import 'consts.dart';
 import 'package:flutter/material.dart';
 import 'register_organizer.dart';
 import 'analytics_admin.dart';
@@ -18,12 +19,13 @@ class HomeAdmin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBackgroundColor,
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: buttonColor,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
+            icon: const Icon(Icons.logout, color: grey),
             onPressed: () => _signOut(context),
           ),
         ],
@@ -78,11 +80,11 @@ class HomeAdmin extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.redAccent,
+          color: buttonColor,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(0.3),
+              color: buttonColor.withOpacity(0.3),
               blurRadius: 10,
               spreadRadius: 2,
             ),
@@ -91,14 +93,14 @@ class HomeAdmin extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: Colors.white),
+            Icon(icon, size: 40, color: grey),
             const SizedBox(height: 10),
             Text(
               title,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: grey,
               ),
               textAlign: TextAlign.center,
             ),

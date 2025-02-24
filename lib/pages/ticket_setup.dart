@@ -1,3 +1,4 @@
+import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 
 class TicketSetupScreen extends StatefulWidget {
@@ -104,11 +105,12 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBackgroundColor,
       appBar: AppBar(
         title: const Text('Ticket Setup'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: buttonColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: grey),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -133,11 +135,11 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _showSummaryDialog,
-                icon: const Icon(Icons.save),
+                icon: const Icon(Icons.save, color: grey),
                 label: const Text("Save Ticket Setup"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: buttonColor,
+                  foregroundColor: grey,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -290,6 +292,7 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle: const TextStyle(color: Colors.white70),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.grey[800],

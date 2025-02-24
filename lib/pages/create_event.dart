@@ -1,3 +1,4 @@
+import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
@@ -77,11 +78,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBackgroundColor,
       appBar: AppBar(
         title: const Text('Create Event'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: buttonColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: grey),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -104,11 +106,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _createEvent,
-                icon: const Icon(Icons.event_available),
+                icon: const Icon(Icons.event_available, color: grey),
                 label: const Text("Create Event"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: buttonColor,
+                  foregroundColor: grey,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -147,7 +149,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             filled: true,
             fillColor: Colors.grey[800],
-            suffixIcon: const Icon(Icons.calendar_today, color: Colors.white70),
+            suffixIcon: const Icon(Icons.calendar_today, color: buttonColor),
           ),
           style: const TextStyle(color: Colors.white),
         ),
@@ -160,11 +162,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       children: [
         ElevatedButton.icon(
           onPressed: _pickFile,
-          icon: const Icon(Icons.upload_file),
+          icon: const Icon(Icons.upload_file, color: grey),
           label: const Text("Upload Poster"),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent,
-            foregroundColor: Colors.white,
+            backgroundColor: buttonColor,
+            foregroundColor: grey,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),

@@ -1,3 +1,4 @@
+import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 import '../Widget/custom_text_field.dart';
 import '../Widget/submit_button.dart';
@@ -18,11 +19,12 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBackgroundColor,
       appBar: AppBar(
         title: const Text('Register Organizer'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: buttonColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: grey),
           onPressed: () => Navigator.pop(context), 
         ),
       ),

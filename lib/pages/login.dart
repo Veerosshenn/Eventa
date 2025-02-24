@@ -1,3 +1,6 @@
+import 'register_screen.dart';
+import 'consts.dart';
+import 'main_screen.dart';
 import 'package:flutter/material.dart';
 import '../Widget/custom_text_field.dart';
 import '../Widget/submit_button.dart';
@@ -29,29 +32,28 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(builder: (context) => const HomeOrganizer(userRole: 'organizer')),
       );
+    } else if (email == "user" && password == "123") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid credentials. Please try again.')),
       );
-    }
+    } 
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Eventa",
-              style: TextStyle(
-                fontSize: 48, 
-                fontWeight: FontWeight.bold,
-                color: Colors.redAccent, 
-              ),
-            ),
+            _buildModernTitle(),
             const SizedBox(height: 40),
             CustomTextField(label: 'Email', textEditingController: emailController),
             CustomTextField(label: 'Password', isObscure: true, textEditingController: passwordController),
@@ -59,8 +61,43 @@ class _LoginScreenState extends State<LoginScreen> {
             SubmitButton(onPressed: _login),
             const SizedBox(height: 10),
             TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RegisterScreen()),
+                );
+              },
+              child: const Text('Sign Up', style: TextStyle(color: Colors.white)),
+            ),
+            TextButton(
               onPressed: () {},
-              child: const Text('Forgot Password?', style: TextStyle(color: Colors.white70)),
+              child: const Text('Forgot Password?', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModernTitle() {
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [Colors.orangeAccent, Colors.deepOrange, Colors.redAccent],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(bounds),
+      child: const Text(
+        "Eventa",
+        style: TextStyle(
+          fontSize: 52,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.5,
+          color: Colors.white,
+          shadows: [
+            Shadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(2, 4),
             ),
           ],
         ),
