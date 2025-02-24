@@ -1,24 +1,18 @@
+import 'package:bit301_assignment1/pages/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'pages/login.dart';
 
 void main() {
-  runApp(const EMSApp());
+  runApp(const MyApp());
 }
 
-class EMSApp extends StatelessWidget {
-  const EMSApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Eventa',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.red,
-        scaffoldBackgroundColor: Colors.black,
-      ),
-      home: const LoginScreen(),
+      home: MainScreen(),
     );
   }
 }
