@@ -1,7 +1,7 @@
-import 'package:bit301_assignment1/Widget/event_info.dart';
-import 'package:bit301_assignment1/models/event_model.dart';
-import 'package:bit301_assignment1/pages/consts.dart';
-import 'package:bit301_assignment1/pages/ticket_booking_screen.dart';
+import '../Widget/event_info.dart';
+import '../models/event_model.dart';
+import 'consts.dart';
+import 'ticket_booking_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventDetailScreen extends StatelessWidget {

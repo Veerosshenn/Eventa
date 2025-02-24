@@ -1,4 +1,4 @@
-import 'package:bit301_assignment1/pages/consts.dart';
+import 'consts.dart';
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatelessWidget {

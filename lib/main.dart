@@ -1,4 +1,4 @@
-import 'package:bit301_assignment1/pages/main_screen.dart';
+import 'pages/main_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

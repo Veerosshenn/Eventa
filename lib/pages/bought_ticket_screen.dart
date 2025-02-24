@@ -1,6 +1,6 @@
-import 'package:bit301_assignment1/pages/consts.dart';
+import 'consts.dart';
 import 'package:flutter/material.dart';
-import 'package:bit301_assignment1/models/event_model.dart';
+import '../models/event_model.dart';
 
 class BoughtTicketScreen extends StatelessWidget {
   final List<Event> events = [

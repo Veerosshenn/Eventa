@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:bit301_assignment1/models/event_model.dart';
-import 'package:bit301_assignment1/pages/consts.dart';
-import 'package:bit301_assignment1/pages/event_detail_screen.dart';
+import '../models/event_model.dart';
+import 'consts.dart';
+import 'event_detail_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {

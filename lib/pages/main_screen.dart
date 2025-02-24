@@ -1,8 +1,8 @@
-import 'package:bit301_assignment1/pages/bought_ticket_screen.dart';
-import 'package:bit301_assignment1/pages/consts.dart';
-import 'package:bit301_assignment1/pages/home_screen.dart';
-import 'package:bit301_assignment1/pages/profile_screen.dart';
-import 'package:bit301_assignment1/pages/waitlist_screen.dart';
+import 'bought_ticket_screen.dart';
+import 'consts.dart';
+import 'home_screen.dart';
+import 'profile_screen.dart';
+import 'waitlist_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

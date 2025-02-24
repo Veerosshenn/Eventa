@@ -1,5 +1,5 @@
-import 'package:bit301_assignment1/pages/consts.dart';
-import 'package:bit301_assignment1/pages/main_screen.dart';
+import 'consts.dart';
+import 'main_screen.dart';
 import 'package:flutter/material.dart';
 
 class WaitlistScreen extends StatefulWidget {

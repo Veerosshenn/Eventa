@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_text_field.dart';
-import '../widgets/submit_button.dart';
+import '../Widget/custom_text_field.dart';
+import '../Widget/submit_button.dart';
 
 class RegisterOrganizerScreen extends StatefulWidget {
   const RegisterOrganizerScreen({super.key});
