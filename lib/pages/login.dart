@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'register_screen.dart';
 import 'consts.dart';
 import 'main_screen.dart';
-import 'package:flutter/material.dart';
 import '../Widget/custom_text_field.dart';
 import '../Widget/submit_button.dart';
 import 'home_admin.dart';
@@ -18,31 +21,108 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool _isLoading = false;
 
-  void _login() {
+  void _login() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    if (email == "admin" && password == "123") {
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar('Please enter both email and password.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      String userRole = await _getUserRole(userCredential.user!.uid);
+      _navigateBasedOnRole(userRole);
+    } on FirebaseAuthException catch (e) {
+      _showSnackBar(e.message ?? 'Login failed. Please try again.');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      String uid = userCredential.user!.uid;
+
+      // Check if user exists in Firestore, if not, create a new record
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (!userDoc.exists) {
+        await FirebaseFirestore.instance.collection('users').doc(uid).set({
+          'email': userCredential.user!.email,
+          'role': 'user', // Default role
+          'name': userCredential.user!.displayName,
+        });
+      }
+
+      String userRole = await _getUserRole(uid);
+      _navigateBasedOnRole(userRole);
+    } catch (e) {
+      _showSnackBar('Google Sign-In failed. Please try again.');
+    }
+  }
+
+  Future<String> _getUserRole(String uid) async {
+    try {
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (userDoc.exists) {
+        return userDoc['role']; 
+      } else {
+        return 'null'; 
+      }
+    } catch (e) {
+      return 'null';
+    }
+  }
+
+  void _navigateBasedOnRole(String role) {
+    if (role == 'admin') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeAdmin(userRole: 'admin')),
       );
-    } else if (email == "organizer" && password == "123") {
+    } else if (role == 'organizer') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomeOrganizer(userRole: 'organizer')),
       );
-    } else if (email == "user" && password == "123") {
+    } else {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid credentials. Please try again.')),
-      );
-    } 
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -59,8 +139,11 @@ class _LoginScreenState extends State<LoginScreen> {
             CustomTextField(label: 'Email', textEditingController: emailController),
             CustomTextField(label: 'Password', isObscure: true, textEditingController: passwordController),
             const SizedBox(height: 20),
-            SubmitButton(onPressed: _login),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : SubmitButton(text: 'Log In',onPressed: _login),
             const SizedBox(height: 10),
+            _buildGoogleSignInButton(),
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -81,6 +164,25 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildGoogleSignInButton() {
+    return ElevatedButton.icon(
+      onPressed: _signInWithGoogle,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: appBackgroundColor,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      icon: Image.asset('google_logo.png', height: 24),
+      label: const Text(
+        'Sign in with Google',
+        style: TextStyle(fontSize: 16),
       ),
     );
   }

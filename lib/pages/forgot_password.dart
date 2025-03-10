@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'consts.dart';
 import '../Widget/custom_text_field.dart';
@@ -12,8 +13,9 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _resetPassword() {
+  Future<void> _resetPassword() async {
     String email = emailController.text.trim();
 
     if (email.isEmpty) {
@@ -23,10 +25,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
-    // Simulating password reset action
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password reset link sent to your email.')),
-    );
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset link sent! Check your email.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context); // Navigate back to login screen
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Something went wrong. Try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override

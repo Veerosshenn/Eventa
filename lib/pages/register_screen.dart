@@ -1,15 +1,89 @@
-import 'consts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'consts.dart';
+import 'login.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  void showError(BuildContext context, String message) {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  bool _isLoading = false;
+
+  void showError(String message) {
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+        .showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.red,
+            )
+          );
+  }
+
+  Future<void> _registerUser() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    String name = nameController.text.trim();
+    String phone = phoneController.text.trim();
+
+    if (email.isEmpty || password.isEmpty || name.isEmpty || phone.isEmpty) {
+      showError("All fields are required!");
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Create user in Firebase Auth
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Store user data in Firestore
+      await _firestore.collection('users').doc(userCredential.user!.uid).set({
+        'uid': userCredential.user!.uid,
+        'role': 'user',
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Registration Successful! Please log in."),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Redirect to Login Page
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      showError(e.message ?? "Registration failed.");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -18,129 +92,69 @@ class RegisterScreen extends StatelessWidget {
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text("Register", style: TextStyle(color: Colors.white)),
+        title: const Text("Register", style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              TextField(
-                controller: emailController,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Colors.grey[800],
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              TextField(
-                controller: nameController,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Name',
-                  labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Colors.grey[800],
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              TextField(
-                controller: phoneController,
-                style: TextStyle(color: Colors.white),
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Colors.grey[800],
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(height: 15),
-              TextField(
-                controller: passwordController,
-                style: TextStyle(color: Colors.white),
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  labelStyle: TextStyle(color: Colors.white70),
-                  fillColor: Colors.grey[800],
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              SizedBox(height: 25),
+              _buildCustomTextField(emailController, "Email"),
+              _buildCustomTextField(nameController, "Name"),
+              _buildCustomTextField(phoneController, "Phone Number", TextInputType.phone),
+              _buildCustomTextField(passwordController, "Password", TextInputType.visiblePassword, true),
+              const SizedBox(height: 25),
               ElevatedButton(
-                onPressed: () {
-                  if (emailController.text.isEmpty) {
-                    showError(context, "Please enter your email");
-                  } else if (nameController.text.isEmpty) {
-                    showError(context, "Please enter your name");
-                  } else if (phoneController.text.isEmpty) {
-                    showError(context, "Please enter your phone number");
-                  } else if (passwordController.text.isEmpty) {
-                    showError(context, "Please enter your password");
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Registration Successful")),
-                    );
-                  }
-                },
+                onPressed: _isLoading ? null : _registerUser,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFffb43b),
+                  backgroundColor: const Color(0xFFffb43b),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 25),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 25),
                 ),
-                child: Text(
-                  "Register",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: grey,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Register",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black),
+                      ),
               ),
-              SizedBox(height: 15),
-              ElevatedButton(
+              const SizedBox(height: 15),
+              TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: appBackgroundColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                ),
-                child: Text(
+                child: const Text(
                   "Already have an account? Login",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: 15, color: Colors.white),
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomTextField(TextEditingController controller, String label,
+      [TextInputType keyboardType = TextInputType.text, bool isObscure = false]) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        obscureText: isObscure,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white70),
+          fillColor: grey,
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15),
+            borderSide: BorderSide.none,
           ),
         ),
       ),

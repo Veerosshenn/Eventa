@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933945132412",
+    "project_id": "eventa-db16a",
+    "storage_bucket": "eventa-db16a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933945132412:android:77e6ba167a40d9dea910f9",
+        "android_client_info": {
+          "package_name": "com.example.assignment1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQ8c2lT5nzBYruF5j6gT-HRW7CO6m8UMA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
