@@ -54,37 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return;
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
-      String uid = userCredential.user!.uid;
-
-      // Check if user exists in Firestore, if not, create a new record
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      if (!userDoc.exists) {
-        await FirebaseFirestore.instance.collection('users').doc(uid).set({
-          'email': userCredential.user!.email,
-          'role': 'user', // Default role
-          'name': userCredential.user!.displayName,
-        });
-      }
-
-      String userRole = await _getUserRole(uid);
-      _navigateBasedOnRole(userRole);
-    } catch (e) {
-      _showSnackBar('Google Sign-In failed. Please try again.');
-    }
-  }
-
   Future<String> _getUserRole(String uid) async {
     try {
       DocumentSnapshot userDoc =
@@ -125,6 +94,47 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  Future<void> _signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: "933945132412-etjtdm16nc4h35grpldqg98369487cnq.apps.googleusercontent.com",
+      );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      if (googleUser == null) return;
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (user != null) {
+        String uid = user.uid;
+
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        if (!userDoc.exists) {
+          await FirebaseFirestore.instance.collection('users').doc(uid).set({
+            'role': 'user',
+            'uid': uid,
+            'email': user.email,
+            'name': user.displayName,
+            'phone': user.phoneNumber,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        String userRole = await _getUserRole(uid);
+        _navigateBasedOnRole(userRole);
+      }
+    } catch (e) {
+      _showSnackBar('Google Sign-In failed. Please try again.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 20),
             _isLoading
                 ? const CircularProgressIndicator()
-                : SubmitButton(text: 'Log In',onPressed: _login),
+                : SubmitButton(text: 'Log In', onPressed: _login),
             const SizedBox(height: 10),
             _buildGoogleSignInButton(),
             TextButton(
