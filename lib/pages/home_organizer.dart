@@ -18,6 +18,7 @@ class HomeOrganizer extends StatefulWidget {
 
 class _HomeOrganizerState extends State<HomeOrganizer> {
   String userName = "Organizer";
+  String userId = "";
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _HomeOrganizerState extends State<HomeOrganizer> {
       if (userDoc.exists) {
         setState(() {
           userName = userDoc['name'] ?? "Organizer";
+          userId = user.uid;
         });
       }
     }
@@ -86,13 +88,13 @@ class _HomeOrganizerState extends State<HomeOrganizer> {
                     context,
                     title: 'Event Creation',
                     icon: Icons.event,
-                    screen: const CreateEventScreen(),
+                    screen: CreateEventScreen(userId: userId),
                   ),
                   _buildCard(
                     context,
                     title: 'View Analytics',
                     icon: Icons.bar_chart,
-                    screen: const AnalyticsOrganizerScreen(),
+                    screen: AnalyticsOrganizerScreen(userId: userId),
                   ),
                   _buildCard(
                     context,
