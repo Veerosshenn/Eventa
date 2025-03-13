@@ -7,7 +7,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:typed_data';
 
 class CreateEventScreen extends StatefulWidget {
-  const CreateEventScreen({super.key});
+  final String userId;
+  const CreateEventScreen({super.key, required this.userId});
 
   @override
   _CreateEventScreenState createState() => _CreateEventScreenState();
@@ -16,7 +17,8 @@ class CreateEventScreen extends StatefulWidget {
 class _CreateEventScreenState extends State<CreateEventScreen> {
   final TextEditingController eventNameController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
-  final TextEditingController timeController = TextEditingController();
+  final TextEditingController startTimeController = TextEditingController();
+  final TextEditingController endTimeController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
@@ -38,14 +40,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
-  Future<void> _selectTime(BuildContext context) async {
+  Future<void> _selectTime(BuildContext context, bool isStartTime) async {
     TimeOfDay? pickedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
+
     if (pickedTime != null) {
       setState(() {
-        timeController.text = pickedTime.format(context);
+        if (isStartTime) {
+          startTimeController.text = pickedTime.format(context);
+        } else {
+          endTimeController.text = pickedTime.format(context);
+        }
       });
     }
   }
@@ -77,7 +84,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   void _createEvent() async {
     if (eventNameController.text.isEmpty ||
         dateController.text.isEmpty ||
-        timeController.text.isEmpty ||
+        startTimeController.text.isEmpty ||
+        endTimeController.text.isEmpty ||
         descriptionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields.')),
@@ -95,10 +103,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     await firestore.collection('events').doc(eventNameKey).set({
       'eventName': eventNameController.text,
       'date': dateController.text,
-      'time': timeController.text,
+      'startTime': startTimeController.text,
+      'endTime': endTimeController.text,
       'description': descriptionController.text,
       'posterUrl': posterUrl ?? '',
       'createdAt': DateTime.now().toIso8601String(),
+      'createdBy': widget.userId,
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -111,7 +121,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     // Reset fields after event creation
     eventNameController.clear();
     dateController.clear();
-    timeController.clear();
+    startTimeController.clear();
+    endTimeController.clear();
     descriptionController.clear();
     setState(() {
       uploadedFileBytes = null;
@@ -140,7 +151,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             const SizedBox(height: 12),
             _buildDateTimeField('Select Date', dateController, _selectDate),
             const SizedBox(height: 12),
-            _buildDateTimeField('Select Time', timeController, _selectTime),
+            _buildDateTimeField(
+              "Start Time", 
+              startTimeController, 
+              (context) => _selectTime(context, true)
+            ),
+            const SizedBox(height: 12),
+            _buildDateTimeField(
+              "End Time", 
+              endTimeController, 
+              (context) => _selectTime(context, false)
+            ),
             const SizedBox(height: 12),
             _buildTextField('Description', descriptionController, maxLines: 3),
             const SizedBox(height: 12),
