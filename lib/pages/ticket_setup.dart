@@ -1,5 +1,6 @@
 import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TicketSetupScreen extends StatefulWidget {
   const TicketSetupScreen({super.key});
@@ -19,9 +20,10 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
   final TextEditingController childLimitController = TextEditingController();
   final TextEditingController promoCodeController = TextEditingController();
   final TextEditingController promoDiscountController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String? selectedEvent;
-  List<String> futureEvents = ["Tech Conference 2024", "Music Fest", "Business Expo"];
+  List<String> allEvents = [];
 
   // Seating Sections Assignment
   final Map<String, String?> seatingAssignments = {
@@ -34,6 +36,27 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
   };
 
   final List<String> ticketTypes = ["General Admission", "VIP", "Senior Citizen", "Child"];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEvents();
+  }
+
+  Future<void> _fetchEvents() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore.collection('events').get();
+      setState(() {
+        allEvents = querySnapshot.docs.map((doc) {
+          return doc['eventName'] as String;
+        }).toList();
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error fetching events: $e')),
+      );
+    }
+  }
 
   void _showSummaryDialog() {
     if (selectedEvent == null ||
@@ -96,10 +119,63 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
     );
   }
 
-  void _saveTicketSetup() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ticket Setup Saved Successfully!')),
-    );
+  Future<void> _saveTicketSetup() async {
+    try {
+      await _firestore.collection('events').doc(selectedEvent).update({
+        'ticketSetup': {
+          'generalAdmission': {
+            'price': generalAdmissionController.text,
+            'limit': generalLimitController.text
+          },
+          'vip': {
+            'price': vipController.text,
+            'limit': vipLimitController.text
+          },
+          'seniorCitizen': {
+            'price': seniorCitizenController.text,
+            'limit': seniorLimitController.text
+          },
+          'child': {
+            'price': childPriceController.text,
+            'limit': childLimitController.text
+          },
+          'seatingAssignments': seatingAssignments,
+          if (promoCodeController.text.isNotEmpty && promoDiscountController.text.isNotEmpty)
+            'promo': {
+              'code': promoCodeController.text,
+              'discount': promoDiscountController.text
+            }
+        }
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ticket Setup Saved Successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      setState(() {
+        selectedEvent = null;
+        generalAdmissionController.clear();
+        vipController.clear();
+        seniorCitizenController.clear();
+        childPriceController.clear();
+        generalLimitController.clear();
+        vipLimitController.clear();
+        seniorLimitController.clear();
+        childLimitController.clear();
+        promoCodeController.clear();
+        promoDiscountController.clear();
+        seatingAssignments.forEach((key, value) {
+          seatingAssignments[key] = null;
+        });
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving ticket setup: $e')),
+      );
+    }
   }
 
   @override
@@ -119,7 +195,7 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDropdown("Select Event", futureEvents, selectedEvent, (value) {
+            _buildDropdown("Select Event", allEvents, selectedEvent, (value) {
               setState(() {
                 selectedEvent = value;
               });

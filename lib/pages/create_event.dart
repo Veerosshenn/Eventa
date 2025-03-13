@@ -2,6 +2,9 @@ import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:typed_data';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -15,12 +18,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final TextEditingController dateController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  String? uploadedFile;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
-  final List<DateTime> bookedDates = [
-    DateTime(2025, 3, 15),
-    DateTime(2025, 3, 20),
-  ];
+  Uint8List? uploadedFileBytes;
+  String? uploadedFileName;
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
@@ -28,9 +30,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2025, 12, 31),
-      selectableDayPredicate: (date) {
-        return !bookedDates.contains(date);
-      },
     );
     if (pickedDate != null) {
       setState(() {
@@ -52,15 +51,30 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null && result.files.single.bytes != null) {
       setState(() {
-        uploadedFile = result.files.single.name;
+        uploadedFileBytes = result.files.single.bytes;
+        uploadedFileName = result.files.single.name;
       });
     }
   }
 
-  void _createEvent() {
+  Future<String?> _uploadToFirebaseStorage(Uint8List fileBytes, String fileName) async {
+    try {
+      String filePath = 'posters/$fileName';
+      Reference ref = storage.ref().child(filePath);
+      UploadTask uploadTask = ref.putData(fileBytes);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print("Error uploading to Firebase Storage: $e");
+      return null;
+    }
+  }
+
+  void _createEvent() async {
     if (eventNameController.text.isEmpty ||
         dateController.text.isEmpty ||
         timeController.text.isEmpty ||
@@ -68,11 +82,41 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields.')),
       );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Event Created Successfully!')),
-      );
+      return;
     }
+
+    String? posterUrl;
+    if (uploadedFileBytes != null && uploadedFileName != null) {
+      posterUrl = await _uploadToFirebaseStorage(uploadedFileBytes!, uploadedFileName!);
+    }
+
+    String eventNameKey = eventNameController.text.trim().replaceAll(' ', '_');
+
+    await firestore.collection('events').doc(eventNameKey).set({
+      'eventName': eventNameController.text,
+      'date': dateController.text,
+      'time': timeController.text,
+      'description': descriptionController.text,
+      'posterUrl': posterUrl ?? '',
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Event Created Successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // Reset fields after event creation
+    eventNameController.clear();
+    dateController.clear();
+    timeController.clear();
+    descriptionController.clear();
+    setState(() {
+      uploadedFileBytes = null;
+      uploadedFileName = null;
+    });
   }
 
   @override
@@ -158,7 +202,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Widget _buildFilePicker() {
-    return Row(
+    return Column(
       children: [
         ElevatedButton.icon(
           onPressed: _pickFile,
@@ -171,14 +215,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
-        const SizedBox(width: 10),
-        if (uploadedFile != null)
-          Expanded(
-            child: Text(
-              uploadedFile!,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white),
-            ),
+        if (uploadedFileBytes != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Image.memory(uploadedFileBytes!, height: 100), // Show image preview
           ),
       ],
     );

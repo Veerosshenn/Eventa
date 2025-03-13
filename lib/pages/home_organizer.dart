@@ -4,13 +4,43 @@ import 'create_event.dart';
 import 'analytics_organizer.dart';
 import 'login.dart';
 import 'ticket_setup.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class HomeOrganizer extends StatelessWidget {
+class HomeOrganizer extends StatefulWidget {
   final String userRole;
 
   const HomeOrganizer({super.key, required this.userRole});
 
+  @override
+  _HomeOrganizerState createState() => _HomeOrganizerState();
+}
+
+class _HomeOrganizerState extends State<HomeOrganizer> {
+  String userName = "Organizer";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = 
+          await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        setState(() {
+          userName = userDoc['name'] ?? "Organizer";
+        });
+      }
+    }
+  }
+
   void _signOut(BuildContext context) {
+    FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -38,7 +68,7 @@ class HomeOrganizer extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Welcome, $userRole!',
+              'Welcome, $userName!',
               style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,

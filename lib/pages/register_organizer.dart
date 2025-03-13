@@ -1,7 +1,10 @@
-import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:assignment1/pages/consts.dart';
 import '../Widget/custom_text_field.dart';
 import '../Widget/submit_button.dart';
+import 'home_admin.dart';
 
 class RegisterOrganizerScreen extends StatefulWidget {
   const RegisterOrganizerScreen({super.key});
@@ -11,6 +14,9 @@ class RegisterOrganizerScreen extends StatefulWidget {
 }
 
 class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -48,7 +54,7 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context); 
+                Navigator.pop(context);
                 _registerOrganizer();
               },
               style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
@@ -60,10 +66,45 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
     );
   }
 
-  void _registerOrganizer() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Organizer registered successfully!')),
-    );
+  Future<void> _registerOrganizer() async {
+    try {
+      String tempPassword = "temp123";
+
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: tempPassword,
+      );
+
+      String uid = userCredential.user!.uid;
+
+      await _firestore.collection('users').doc(uid).set({
+        'fullName': fullNameController.text.trim(),
+        
+        'email': emailController.text.trim(),
+        'phone': phoneController.text.trim(),
+        'organization': orgNameController.text.trim(),
+        'role': 'organizer',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      await _auth.sendPasswordResetEmail(email: emailController.text.trim());
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeAdmin(userRole: 'admin')),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Organizer registered successfully! Instructions to reset the password has been sent to the email.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
   }
 
   @override
