@@ -1,17 +1,24 @@
 import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+// import '../calculations/organizer_analytics_calculations.dart';
 
 class AnalyticsOrganizerScreen extends StatefulWidget {
-  const AnalyticsOrganizerScreen({super.key});
+  final String userId;
+  const AnalyticsOrganizerScreen({super.key, required this.userId});
 
   @override
   _AnalyticsOrganizerScreenState createState() => _AnalyticsOrganizerScreenState();
 }
 
 class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
-  String selectedTimeframe = "Monthly";
-  final List<String> timeframes = ["Custom Range", "Weekly", "Monthly"];
+  late Future<Map<String, dynamic>> analyticsData;
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   analyticsData = OrganizerAnalyticsCalculations().fetchAnalyticsData(widget.userId);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -27,66 +34,31 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Select Timeframe",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 10),
-            Theme(
-              data: Theme.of(context).copyWith(canvasColor: Colors.white),
-              child: DropdownButtonFormField<String>(
-                value: selectedTimeframe,
-                items: timeframes.map((String timeframe) {
-                  return DropdownMenuItem<String>(
-                    value: timeframe,
-                    child: Text(timeframe, style: const TextStyle(color: Colors.black)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedTimeframe = value!;
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildStatCard("Total Revenue", "RM 125,000", Icons.attach_money),
-                  _buildStatCard("Total Tickets Sold", "4,500", Icons.confirmation_number),
-                  _buildStatCard("Seat Occupancy", "85%", Icons.event_seat),
-                  const SizedBox(height: 20),
-                  _buildBarChart(), // 📊 Ticket Sales Over Time
-                  const SizedBox(height: 20),
-                  _buildPieChart(), // 🥧 Seat Occupancy Breakdown
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.download, color: grey),
-                label: const Text("Download Report"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: buttonColor,
-                  foregroundColor: grey,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-              ),
-            ),
-          ],
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: analyticsData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return const Center(child: Text("Error loading data", style: TextStyle(color: Colors.white)));
+            }
+
+            var data = snapshot.data ?? {};
+
+            return ListView(
+              children: [
+                _buildStatCard("Total Revenue", "RM ${data['totalRevenue']}", Icons.attach_money),
+                _buildStatCard("Total Tickets Sold", "${data['totalTicketsSold']}", Icons.confirmation_number),
+                _buildStatCard("Seat Occupancy", "${data['seatOccupancy']}%", Icons.event_seat),
+                const SizedBox(height: 20),
+                _buildBarChart(),
+                const SizedBox(height: 20),
+                _buildPieChart(data['seatOccupancy']),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -119,7 +91,6 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
     );
   }
 
-  // 📊 Bar Chart for Ticket Sales
   Widget _buildBarChart() {
     return Container(
       height: 250,
@@ -163,8 +134,7 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
     );
   }
 
-  // 🥧 Pie Chart for Seat Occupancy
-  Widget _buildPieChart() {
+  Widget _buildPieChart(double occupancy) {
     return Container(
       height: 250,
       padding: const EdgeInsets.all(12),
@@ -185,8 +155,8 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
                 sectionsSpace: 2,
                 centerSpaceRadius: 50,
                 sections: [
-                  PieChartSectionData(color: Colors.greenAccent, value: 85, title: "Occupied", radius: 50),
-                  PieChartSectionData(color: Colors.redAccent, value: 15, title: "Vacant", radius: 50),
+                  PieChartSectionData(color: Colors.greenAccent, value: occupancy, title: "Occupied", radius: 50),
+                  PieChartSectionData(color: Colors.redAccent, value: 100 - occupancy, title: "Vacant", radius: 50),
                 ],
               ),
             ),

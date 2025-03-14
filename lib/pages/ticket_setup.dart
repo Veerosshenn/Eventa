@@ -1,5 +1,6 @@
 import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TicketSetupScreen extends StatefulWidget {
@@ -20,22 +21,20 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
   final TextEditingController childLimitController = TextEditingController();
   final TextEditingController promoCodeController = TextEditingController();
   final TextEditingController promoDiscountController = TextEditingController();
+  final TextEditingController promoExpiryController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String? selectedEvent;
   List<String> allEvents = [];
+  bool isPromoEnabled = false;
+  bool isPromoExpiryEnabled = false;
 
-  // Seating Sections Assignment
-  final Map<String, String?> seatingAssignments = {
-    "CAT 1": null,
-    "CAT 2": null,
-    "CAT 3": null,
-    "CAT 4": null,
-    "CAT 5": null,
-    "CAT 6": null
+  final Map<String, bool> categoryAvailability = {
+    "General Admission": true,
+    "VIP": false,
+    "Senior Citizen": false,
+    "Child": false,
   };
-
-  final List<String> ticketTypes = ["General Admission", "VIP", "Senior Citizen", "Child"];
 
   @override
   void initState() {
@@ -60,16 +59,15 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
 
   void _showSummaryDialog() {
     if (selectedEvent == null ||
-        generalAdmissionController.text.isEmpty ||
-        vipController.text.isEmpty ||
-        seniorCitizenController.text.isEmpty ||
-        childPriceController.text.isEmpty ||
-        seatingAssignments.values.any((value) => value == null)) {  
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields and assign seating.')),
-      );
-      return;
-    }
+      !(categoryAvailability['General Admission'] == true && generalAdmissionController.text.isNotEmpty ||
+        categoryAvailability['VIP'] == true && vipController.text.isNotEmpty ||
+        categoryAvailability['Senior Citizen'] == true && seniorCitizenController.text.isNotEmpty ||
+        categoryAvailability['Child'] == true && childPriceController.text.isNotEmpty)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill in all required fields.')),
+    );
+    return;
+  }
 
     showDialog(
       context: context,
@@ -82,28 +80,27 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
               children: [
                 _buildSummaryItem("Event:", selectedEvent!),
                 const SizedBox(height: 10),
-                const Text("Ticket Prices & Limits:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                _buildSummaryItem("General Admission:", "RM ${generalAdmissionController.text} (${generalLimitController.text} max)"),
-                _buildSummaryItem("VIP:", "RM ${vipController.text} (${vipLimitController.text} max)"),
-                _buildSummaryItem("Senior Citizen:", "RM ${seniorCitizenController.text} (${seniorLimitController.text} max)"),
-                _buildSummaryItem("Child:", "RM ${childPriceController.text} (${childLimitController.text} max)"),
-                const SizedBox(height: 10),
-                const Text("Seating Assignments:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                ...seatingAssignments.entries.map((entry) {
-                  return _buildSummaryItem("${entry.key}:", entry.value ?? "Not assigned");
+                const Text("Category Availability:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ...categoryAvailability.entries.map((entry) {
+                  return _buildSummaryItem("${entry.key}:", entry.value ? "Available" : "Locked");
                 }).toList(),
+                const SizedBox(height: 10),
+                const Text("Ticket Prices & Limits:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                _buildSummarySection(),
                 if (promoCodeController.text.isNotEmpty && promoDiscountController.text.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   const Text("Promotional Offers:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   _buildSummaryItem("Promo Code:", promoCodeController.text),
                   _buildSummaryItem("Discount:", "${promoDiscountController.text}%"),
+                  if (promoExpiryController.text.isNotEmpty)
+                    _buildSummaryItem("Expiry Date:", promoExpiryController.text),
                 ],
               ],
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context), // Cancel button
+              onPressed: () => Navigator.pop(context),
               child: const Text("Cancel"),
             ),
             ElevatedButton(
@@ -121,56 +118,53 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
 
   Future<void> _saveTicketSetup() async {
     try {
-      await _firestore.collection('events').doc(selectedEvent).update({
-        'ticketSetup': {
-          'generalAdmission': {
-            'price': generalAdmissionController.text,
-            'limit': generalLimitController.text
-          },
-          'vip': {
-            'price': vipController.text,
-            'limit': vipLimitController.text
-          },
-          'seniorCitizen': {
-            'price': seniorCitizenController.text,
-            'limit': seniorLimitController.text
-          },
-          'child': {
-            'price': childPriceController.text,
-            'limit': childLimitController.text
-          },
-          'seatingAssignments': seatingAssignments,
-          if (promoCodeController.text.isNotEmpty && promoDiscountController.text.isNotEmpty)
-            'promo': {
-              'code': promoCodeController.text,
-              'discount': promoDiscountController.text
-            }
+      String formattedEventId = selectedEvent?.replaceAll(' ', '_') ?? '';
+
+      Map<String, dynamic> ticketData = {};
+      
+      void addTicketCategory(String category, TextEditingController priceController, TextEditingController limitController) {
+        if (priceController.text.isNotEmpty && limitController.text.isNotEmpty) {
+          ticketData[category] = {
+            'price': priceController.text,
+            'limit': limitController.text,
+          };
         }
-      });
+      }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Ticket Setup Saved Successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      addTicketCategory('generalAdmission', generalAdmissionController, generalLimitController);
+      addTicketCategory('vip', vipController, vipLimitController);
+      addTicketCategory('seniorCitizen', seniorCitizenController, seniorLimitController);
+      addTicketCategory('child', childPriceController, childLimitController);
 
-      setState(() {
-        selectedEvent = null;
-        generalAdmissionController.clear();
-        vipController.clear();
-        seniorCitizenController.clear();
-        childPriceController.clear();
-        generalLimitController.clear();
-        vipLimitController.clear();
-        seniorLimitController.clear();
-        childLimitController.clear();
-        promoCodeController.clear();
-        promoDiscountController.clear();
-        seatingAssignments.forEach((key, value) {
-          seatingAssignments[key] = null;
+      ticketData['categoryAvailability'] = categoryAvailability;
+
+      if (promoCodeController.text.isNotEmpty && promoDiscountController.text.isNotEmpty) {
+        ticketData['promo'] = {
+          'code': promoCodeController.text,
+          'discount': promoDiscountController.text,
+          if (promoExpiryController.text.isNotEmpty) 'expiryDate': promoExpiryController.text,
+        };
+      }
+
+      if (ticketData.isNotEmpty) {
+        await _firestore.collection('events').doc(formattedEventId).update({
+          'ticketSetup': ticketData,
         });
-      });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Ticket Setup Saved Successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please fill in at least one ticket category.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error saving ticket setup: $e')),
@@ -201,9 +195,9 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
               });
             }),
             const SizedBox(height: 20),
-            _buildTicketPricing(),
-            const SizedBox(height: 20),
             _buildSeatingAssignment(),
+            const SizedBox(height: 20),
+            _buildTicketPricing(),
             const SizedBox(height: 20),
             _buildPromoCodeSection(),
             const SizedBox(height: 20),
@@ -267,10 +261,14 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         const SizedBox(height: 10),
-        _buildPriceAndLimitField('General Admission', generalAdmissionController, generalLimitController),
-        _buildPriceAndLimitField('VIP', vipController, vipLimitController),
-        _buildPriceAndLimitField('Senior Citizen', seniorCitizenController, seniorLimitController),
-        _buildPriceAndLimitField('Child', childPriceController, childLimitController),
+        if (categoryAvailability['General Admission'] ?? false)
+          _buildPriceAndLimitField('General Admission', generalAdmissionController, generalLimitController),
+        if (categoryAvailability['VIP'] ?? false)
+          _buildPriceAndLimitField('VIP', vipController, vipLimitController),
+        if (categoryAvailability['Senior Citizen'] ?? false)
+          _buildPriceAndLimitField('Senior Citizen', seniorCitizenController, seniorLimitController),
+        if (categoryAvailability['Child'] ?? false)
+          _buildPriceAndLimitField('Child', childPriceController, childLimitController),
       ],
     );
   }
@@ -317,34 +315,38 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
   }
 
   Widget _buildSeatingAssignment() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Assign Ticket Categories to Seating Sections",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        const SizedBox(height: 10),
-        Center(
-          child: Image.asset(
-            'assets/seating_layout.png',
-            height: 180,
-            fit: BoxFit.contain,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Column(
-          children: seatingAssignments.keys.map((section) {
-            return _buildDropdown(section, ticketTypes, seatingAssignments[section], (value) {
-              setState(() {
-                seatingAssignments[section] = value;
-              });
-            });
-          }).toList(),
-        ),
-      ],
-    );
-  }
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        "Manage Seating Availability",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+      ),
+      const SizedBox(height: 10),
+      Column(
+        children: categoryAvailability.keys.map((section) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                section,
+                style: const TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              Switch(
+                value: categoryAvailability[section] ?? true,
+                onChanged: (value) {
+                  setState(() {
+                    categoryAvailability[section] = value;
+                  });
+                },
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    ],
+  );
+}
 
   Widget _buildPromoCodeSection() {
     return Column(
@@ -355,11 +357,56 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         const SizedBox(height: 10),
-        _buildTextField('Promo Code', promoCodeController),
-        _buildDiscountField('Discount Percentage', promoDiscountController),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Enable Promo Code",
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
+            Switch(
+              value: isPromoEnabled,
+              onChanged: (value) {
+                setState(() {
+                  isPromoEnabled = value;
+                });
+              },
+            ),
+          ],
+        ),
+        if (isPromoEnabled) ...[
+          _buildTextField('Promo Code', promoCodeController),
+          _buildDiscountField('Discount Percentage', promoDiscountController),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Enable Promo Expiry Date",
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              Switch(
+                value: isPromoExpiryEnabled,
+                onChanged: (value) {
+                  setState(() {
+                    isPromoExpiryEnabled = value;
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (isPromoExpiryEnabled)
+            _buildDateTimeField(
+              "Promo Expiry Date", 
+              promoExpiryController, 
+              _selectDate,
+            ),
+        ],
       ],
     );
   }
+
 
   Widget _buildTextField(String label, TextEditingController controller) {
     return Padding(
@@ -403,5 +450,73 @@ class _TicketSetupScreenState extends State<TicketSetupScreen> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Text("$title $value", style: const TextStyle(fontSize: 16)),
     );
+  }
+
+  Widget _buildSummarySection() {
+    Map<String, TextEditingController> priceControllers = {
+      "General Admission": generalAdmissionController,
+      "VIP": vipController,
+      "Senior Citizen": seniorCitizenController,
+      "Child": childPriceController,
+    };
+
+    Map<String, TextEditingController> limitControllers = {
+      "General Admission": generalLimitController,
+      "VIP": vipLimitController,
+      "Senior Citizen": seniorLimitController,
+      "Child": childLimitController,
+    };
+
+    List<Widget> summaryItems = priceControllers.entries
+        .where((entry) =>
+            categoryAvailability[entry.key] == true &&
+            entry.value.text.isNotEmpty &&
+            limitControllers[entry.key]!.text.isNotEmpty)
+        .map((entry) => _buildSummaryItem(
+              "${entry.key}:",
+              "RM ${entry.value.text} (${limitControllers[entry.key]!.text} max)",
+            ))
+        .toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: summaryItems.isNotEmpty
+          ? summaryItems
+          : [const Text("No ticket categories selected.", style: TextStyle(color: Colors.white))],
+    );
+  }
+
+  Widget _buildDateTimeField(String label, TextEditingController controller, Function(BuildContext) onTap) {
+    return InkWell(
+      onTap: () => onTap(context),
+      child: IgnorePointer(
+        child: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            labelStyle: const TextStyle(color: Colors.white70),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            filled: true,
+            fillColor: Colors.grey[800],
+            suffixIcon: const Icon(Icons.calendar_today, color: buttonColor),
+          ),
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2025, 12, 31),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        promoExpiryController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+      });
+    }
   }
 }
