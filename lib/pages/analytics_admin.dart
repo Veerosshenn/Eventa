@@ -1,6 +1,7 @@
-import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../calculations/admin_analytics_calculations.dart';
+import 'package:assignment1/pages/consts.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -10,8 +11,35 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  String selectedTimeframe = "Monthly"; 
-  final List<String> timeframes = ["Custom Range", "Weekly", "Monthly"];
+  String selectedTimeframe = "Weekly"; 
+  final List<String> timeframes = ["Weekly", "Monthly", "Annual"];
+
+  int _totalBookings = 0;
+  int _eventsHosted = 0;
+  double _utilizationRate = 0.0;
+  Map<int, int> _eventsHostedOverTime = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAnalytics(); 
+  }
+
+  void fetchAnalytics() async {
+    final analytics = AdminAnalyticsCalculations();
+
+    int totalBookings = await analytics.getTotalBookings();
+    int eventsHosted = await analytics.getEventsHosted();
+    double utilizationRate = await analytics.getUtilizationRate(selectedTimeframe);
+    Map<int, int> eventsHostedOverTime = await analytics.getEventsHostedOverTime(selectedTimeframe);
+
+    setState(() {
+      _totalBookings = totalBookings;
+      _eventsHosted = eventsHosted;
+      _utilizationRate = utilizationRate;
+      _eventsHostedOverTime = eventsHostedOverTime;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +76,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 onChanged: (value) {
                   setState(() {
                     selectedTimeframe = value!;
+                    fetchAnalytics();
                   });
                 },
                 decoration: InputDecoration(
@@ -61,13 +90,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildStatCard("Auditorium Bookings", "25", Icons.event_seat),
-                  _buildStatCard("Events Hosted", "10", Icons.calendar_today),
-                  _buildStatCard("Utilization Rate", "75%", Icons.bar_chart),
+                  _buildStatCard("Auditorium Bookings", _totalBookings.toString(), Icons.event_seat),
+                  _buildStatCard("Events Hosted", _eventsHosted.toString(), Icons.calendar_today),
+                  _buildStatCard("Utilization Rate", "${_utilizationRate.toStringAsFixed(2)}%", Icons.bar_chart),
                   const SizedBox(height: 20),
-                  _buildBarChart(), // 📊 Bar Chart
+                  _buildBarChart(),
                   const SizedBox(height: 20),
-                  _buildPieChart(), // 🥧 Pie Chart
+                  _buildPieChart(),
                 ],
               ),
             ),
@@ -75,7 +104,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () async {
+                  await generatePDF(selectedTimeframe, _totalBookings, _eventsHosted, _utilizationRate, _eventsHostedOverTime);
+                },
                 icon: const Icon(Icons.download, color: grey),
                 label: const Text("Download Report"),
                 style: ElevatedButton.styleFrom(
@@ -119,7 +150,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  // 📊 Bar Chart for Event Trends
   Widget _buildBarChart() {
     return Container(
       height: 250,
@@ -145,39 +175,31 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        switch (value.toInt()) {
-                          case 0: return const Text("Jan", style: TextStyle(color: Colors.white));
-                          case 1: return const Text("Feb", style: TextStyle(color: Colors.white));
-                          case 2: return const Text("Mar", style: TextStyle(color: Colors.white));
-                          case 3: return const Text("Apr", style: TextStyle(color: Colors.white));
-                          case 4: return const Text("May", style: TextStyle(color: Colors.white));
-                          case 5: return const Text("Jun", style: TextStyle(color: Colors.white));
-                          case 6: return const Text("Jul", style: TextStyle(color: Colors.white));
-                          case 7: return const Text("Aug", style: TextStyle(color: Colors.white));
-                          case 8: return const Text("Sep", style: TextStyle(color: Colors.white));
-                          case 9: return const Text("Oct", style: TextStyle(color: Colors.white));
-                          case 10: return const Text("Nov", style: TextStyle(color: Colors.white));
-                          case 11: return const Text("Dec", style: TextStyle(color: Colors.white));
-                          default: return Container();
+                        if (selectedTimeframe == "Weekly") {
+                          List<String> days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+                          return Text(days[value.toInt()], style: const TextStyle(color: Colors.white));
+                        } else if (selectedTimeframe == "Monthly") {
+                          return Text("Week ${(value.toInt() + 1)}", style: const TextStyle(color: Colors.white));
+                        } else {
+                          List<String> months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                          return Text(months[value.toInt()], style: const TextStyle(color: Colors.white));
                         }
                       },
                     ),
                   ),
                 ),
-                barGroups: [
-                  BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
-                  BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
-                  BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
-                  BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
-                  BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
-                  BarChartGroupData(x: 5, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
-                  BarChartGroupData(x: 6, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
-                  BarChartGroupData(x: 7, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
-                  BarChartGroupData(x: 8, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
-                  BarChartGroupData(x: 9, barRods: [BarChartRodData(toY: 8, color: buttonColor)]),
-                  BarChartGroupData(x: 10, barRods: [BarChartRodData(toY: 12, color: buttonColor)]),
-                  BarChartGroupData(x: 11, barRods: [BarChartRodData(toY: 5, color: buttonColor)]),
-                ],
+                barGroups: List.generate(
+                  selectedTimeframe == "Weekly" ? 7 : selectedTimeframe == "Monthly" ? 5 : 12,
+                  (index) => BarChartGroupData(
+                    x: index,
+                    barRods: [
+                      BarChartRodData(
+                        toY: (_eventsHostedOverTime[index] ?? 0).toDouble(),
+                        color: buttonColor,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -186,10 +208,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  // 🥧 Pie Chart for Utilization Stats
   Widget _buildPieChart() {
     return Container(
-      height: 250,
+      height: 300, // Increased height to accommodate the legend
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white12,
@@ -198,7 +219,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Column(
         children: [
           const Text(
-            "Utilization Breakdown",
+            "Utilization Rate",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
@@ -208,15 +229,49 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 sectionsSpace: 2,
                 centerSpaceRadius: 50,
                 sections: [
-                  PieChartSectionData(color: Colors.blueAccent, value: 50, title: "50%", radius: 50),
-                  PieChartSectionData(color: Colors.redAccent, value: 30, title: "30%", radius: 50),
-                  PieChartSectionData(color: Colors.greenAccent, value: 20, title: "20%", radius: 50),
+                  PieChartSectionData(
+                    color: Colors.blueAccent,
+                    value: _utilizationRate,
+                    title: "${_utilizationRate.toStringAsFixed(1)}%",
+                    radius: 50,
+                  ),
+                  PieChartSectionData(
+                    color: Colors.grey,
+                    value: 100 - _utilizationRate,
+                    title: "${(100 - _utilizationRate).toStringAsFixed(1)}%",
+                    radius: 50,
+                  ),
                 ],
               ),
             ),
           ),
+          const SizedBox(height: 10),
+          // Legend Section
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLegendItem(Colors.blueAccent, "Utilized"),
+              const SizedBox(width: 20),
+              _buildLegendItem(Colors.grey, "Not Utilized"),
+            ],
+          ),
         ],
       ),
+    );
+  }
+
+  // Helper function to create legend items
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
+        const SizedBox(width: 5),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
+      ],
     );
   }
 }
