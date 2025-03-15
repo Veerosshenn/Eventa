@@ -10,6 +10,7 @@ import '../Widget/submit_button.dart';
 import 'home_admin.dart';
 import 'home_organizer.dart';
 import 'forgot_password.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     String password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _showSnackBar('Please enter both email and password.');
+      _showSnackBar('Please enter both email and password.'.tr());
       return;
     }
 
@@ -46,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
       String userRole = await _getUserRole(userCredential.user!.uid);
       _navigateBasedOnRole(userRole);
     } on FirebaseAuthException catch (e) {
-      _showSnackBar(e.message ?? 'Login failed. Please try again.');
+      _showSnackBar(e.message ?? 'Login failed. Please try again.'.tr());
     } finally {
       setState(() {
         _isLoading = false;
@@ -131,13 +132,45 @@ class _LoginScreenState extends State<LoginScreen> {
         _navigateBasedOnRole(userRole);
       }
     } catch (e) {
-      _showSnackBar('Google Sign-In failed. Please try again.');
+      _showSnackBar('Google Sign-In failed. Please try again.'.tr());
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: appBackgroundColor,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                TextButton(
+                  onPressed: () {
+                    context.setLocale(Locale('en'));
+                  },
+                  child: Text("EN", style: TextStyle(color: Colors.white)),
+                ),
+                SizedBox(
+                  height: 25, 
+                  child: VerticalDivider(
+                    color: Colors.white,
+                    thickness: 1,
+                    width: 20,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    context.setLocale(Locale('zh'));
+                  },
+                  child: Text("中文", style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       backgroundColor: appBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -146,12 +179,12 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             _buildModernTitle(),
             const SizedBox(height: 40),
-            CustomTextField(label: 'Email', textEditingController: emailController),
-            CustomTextField(label: 'Password', isObscure: true, textEditingController: passwordController),
+            CustomTextField(label: 'Email'.tr(), textEditingController: emailController),
+            CustomTextField(label: 'Password'.tr(), isObscure: true, textEditingController: passwordController),
             const SizedBox(height: 20),
             _isLoading
                 ? const CircularProgressIndicator()
-                : SubmitButton(text: 'Log In', onPressed: _login),
+                : SubmitButton(text: 'Log In'.tr(), onPressed: _login),
             const SizedBox(height: 10),
             _buildGoogleSignInButton(),
             TextButton(
@@ -161,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   MaterialPageRoute(builder: (context) => RegisterScreen()),
                 );
               },
-              child: const Text('Sign Up', style: TextStyle(color: Colors.white)),
+              child: Text('Sign Up'.tr(), style: TextStyle(color: Colors.white)),
             ),
             TextButton(
               onPressed: () {
@@ -170,7 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   MaterialPageRoute(builder: (context) => const ForgotPasswordScreen()),
                 );
               },
-              child: const Text('Forgot Password?', style: TextStyle(color: Colors.white)),
+              child: Text('Forgot Password?'.tr(), style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -189,9 +222,9 @@ class _LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      icon: Image.asset('google_logo.png', height: 24),
-      label: const Text(
-        'Sign in with Google',
+      icon: Image.asset('assets/images/google_logo.png', height: 24),
+      label: Text(
+        'Sign in with Google'.tr(),
         style: TextStyle(fontSize: 16),
       ),
     );

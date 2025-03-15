@@ -1,5 +1,6 @@
 import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SubmitButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -21,7 +22,7 @@ class SubmitButton extends StatelessWidget {
           ),
           onPressed: onPressed,
           child: Text(
-            text, 
+            text.tr(),
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),

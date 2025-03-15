@@ -5,6 +5,7 @@ import 'package:assignment1/pages/consts.dart';
 import '../Widget/custom_text_field.dart';
 import '../Widget/submit_button.dart';
 import 'home_admin.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegisterOrganizerScreen extends StatefulWidget {
   const RegisterOrganizerScreen({super.key});
@@ -27,7 +28,7 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
         emailController.text.isEmpty ||
         phoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields.')),
+        SnackBar(content: Text('Please fill in all required fields.'.tr())),
       );
       return;
     }
@@ -36,21 +37,21 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Confirm Registration"),
+          title: Text("Confirm Registration".tr()),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSummaryItem("Full Name:", fullNameController.text),
-              _buildSummaryItem("Email:", emailController.text),
-              _buildSummaryItem("Phone:", phoneController.text),
-              if (orgNameController.text.isNotEmpty) _buildSummaryItem("Organization:", orgNameController.text),
+              _buildSummaryItem("Full Name:".tr(), fullNameController.text),
+              _buildSummaryItem("Email:".tr(), emailController.text),
+              _buildSummaryItem("Phone:".tr(), phoneController.text),
+              if (orgNameController.text.isNotEmpty) _buildSummaryItem("Organization:".tr(), orgNameController.text),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context), 
-              child: const Text("Cancel"),
+              child: Text("Cancel".tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -58,7 +59,7 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
                 _registerOrganizer();
               },
               style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
-              child: const Text("Confirm"),
+              child: Text("Confirm".tr()),
             ),
           ],
         );
@@ -95,8 +96,8 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Organizer registered successfully! Instructions to reset the password has been sent to the email.'),
+        SnackBar(
+          content: Text('Organizer registered successfully! Instructions to reset the password has been sent to the email.'.tr()),
           backgroundColor: Colors.green,
         ),
       );
@@ -112,7 +113,7 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: const Text('Register Organizer'),
+        title: Text('Register Organizer'.tr()),
         backgroundColor: buttonColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: grey),
@@ -123,10 +124,10 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            CustomTextField(label: 'Full Name', textEditingController: fullNameController),
-            CustomTextField(label: 'Email', textEditingController: emailController),
-            CustomTextField(label: 'Phone Number', textEditingController: phoneController),
-            CustomTextField(label: 'Organization Name (If Applicable)', textEditingController: orgNameController),
+            CustomTextField(label: 'Full Name'.tr(), textEditingController: fullNameController),
+            CustomTextField(label: 'Email'.tr(), textEditingController: emailController),
+            CustomTextField(label: 'Phone Number'.tr(), textEditingController: phoneController),
+            CustomTextField(label: 'Organization Name (If Applicable)'.tr(), textEditingController: orgNameController),
             const SizedBox(height: 20),
             SubmitButton(onPressed: _showConfirmationDialog),
           ],

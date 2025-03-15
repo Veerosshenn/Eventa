@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'consts.dart';
 import '../Widget/custom_text_field.dart';
 import '../Widget/submit_button.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -20,7 +21,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email.')),
+        SnackBar(content: Text('Please enter your email.'.tr())),
       );
       return;
     }
@@ -28,8 +29,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       await _auth.sendPasswordResetEmail(email: email);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password reset link sent! Check your email.'),
+        SnackBar(
+          content: Text('Password reset link sent! Check your email.'.tr()),
           backgroundColor: Colors.green,
         ),
       );
@@ -37,7 +38,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.message ?? 'Something went wrong. Try again.'),
+          content: Text(e.message ?? 'Something went wrong. Try again.'.tr()),
           backgroundColor: Colors.red,
         ),
       );
@@ -49,7 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: const Text('Forgot Password'),
+        title: Text('Forgot Password'.tr()),
         backgroundColor: buttonColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: grey),
@@ -61,8 +62,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Reset Your Password",
+            Text(
+              "Reset Your Password".tr(),
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -70,13 +71,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              "Enter your email and we'll send you a password reset link.",
+            Text(
+              "Enter your email and we'll send you a password reset link.".tr(),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 30),
-            CustomTextField(label: 'Email', textEditingController: emailController),
+            CustomTextField(label: 'Email'.tr(), textEditingController: emailController),
             const SizedBox(height: 20),
             SubmitButton(onPressed: _resetPassword),
           ],

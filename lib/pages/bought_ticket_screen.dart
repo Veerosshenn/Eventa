@@ -8,7 +8,7 @@ class BoughtTicketScreen extends StatelessWidget {
       title: "Music Festival 2025",
       location: "Stadium A, KL",
       duration: 180,
-      poster: "music_festival.jpeg",
+      poster: "assets/images/music_festival.jpeg",
       description:
           "Join us for an exciting music festival featuring top artists from around the world.",
       price: 20,
@@ -18,7 +18,7 @@ class BoughtTicketScreen extends StatelessWidget {
       title: "Tech Conference",
       location: "Convention Center",
       duration: 300,
-      poster: "tech_conference.jpeg",
+      poster: "assets/images/tech_conference.jpeg",
       description:
           "Explore the latest tech innovations at this year’s tech conference.",
       price: 50,
@@ -35,7 +35,7 @@ class BoughtTicketScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset("qr_code.png", height: 150, width: 150),
+            Image.asset("assets/images/qr_code.png", height: 150, width: 150),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: canCancel

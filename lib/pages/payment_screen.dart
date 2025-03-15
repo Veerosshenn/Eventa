@@ -140,7 +140,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 Column(
                   children: [
                     Image.asset(
-                      'debit_card.png',
+                      'assets/images/debit_card.png',
                       width: 200,
                       height: 80,
                     ),
@@ -163,7 +163,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 Column(
                   children: [
                     Image.asset(
-                      'credit_card.png',
+                      'assets/images/credit_card.png',
                       width: 200,
                       height: 80,
                     ),
@@ -186,7 +186,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 Column(
                   children: [
                     Image.asset(
-                      'tng.jpeg',
+                      'assets/images/tng.jpeg',
                       width: 200,
                       height: 80,
                     ),

@@ -42,7 +42,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Image.asset(
-              'hall_layout.png',
+              'assets/images/hall_layout.png',
               height: 250,
               fit: BoxFit.contain,
             ),

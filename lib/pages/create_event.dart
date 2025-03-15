@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:typed_data';
+import 'package:easy_localization/easy_localization.dart';
 
 class CreateEventScreen extends StatefulWidget {
   final String userId;
@@ -88,7 +89,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         endTimeController.text.isEmpty ||
         descriptionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields.')),
+        SnackBar(content: Text('Please fill all required fields.'.tr())),
       );
       return;
     }
@@ -112,8 +113,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Event Created Successfully!'),
+      SnackBar(
+        content: Text('Event Created Successfully!'.tr()),
         backgroundColor: Colors.green,
       ),
     );
@@ -135,7 +136,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: const Text('Create Event'),
+        title: Text('Create Event'.tr()),
         backgroundColor: buttonColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: grey),
@@ -147,23 +148,23 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTextField('Event Name', eventNameController),
+            _buildTextField('Event Name'.tr(), eventNameController),
             const SizedBox(height: 12),
-            _buildDateTimeField('Select Date', dateController, _selectDate),
+            _buildDateTimeField('Select Date'.tr(), dateController, _selectDate),
             const SizedBox(height: 12),
             _buildDateTimeField(
-              "Start Time", 
+              "Start Time".tr(), 
               startTimeController, 
               (context) => _selectTime(context, true)
             ),
             const SizedBox(height: 12),
             _buildDateTimeField(
-              "End Time", 
+              "End Time".tr(), 
               endTimeController, 
               (context) => _selectTime(context, false)
             ),
             const SizedBox(height: 12),
-            _buildTextField('Description', descriptionController, maxLines: 3),
+            _buildTextField('Description'.tr(), descriptionController, maxLines: 3),
             const SizedBox(height: 12),
             _buildFilePicker(),
             const SizedBox(height: 20),
@@ -172,7 +173,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               child: ElevatedButton.icon(
                 onPressed: _createEvent,
                 icon: const Icon(Icons.event_available, color: grey),
-                label: const Text("Create Event"),
+                label: Text("Create Event".tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   foregroundColor: grey,
@@ -228,7 +229,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         ElevatedButton.icon(
           onPressed: _pickFile,
           icon: const Icon(Icons.upload_file, color: grey),
-          label: const Text("Upload Poster"),
+          label: Text("Upload Poster".tr()),
           style: ElevatedButton.styleFrom(
             backgroundColor: buttonColor,
             foregroundColor: grey,

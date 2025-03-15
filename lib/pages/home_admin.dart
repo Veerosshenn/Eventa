@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'register_organizer.dart';
 import 'analytics_admin.dart';
 import 'login.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class HomeAdmin extends StatelessWidget {
   final String userRole;
@@ -21,7 +22,7 @@ class HomeAdmin extends StatelessWidget {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: const Text('Admin Dashboard'),
+        title: Text('Admin Dashboard'.tr()),
         backgroundColor: buttonColor,
         actions: [
           IconButton(
@@ -37,7 +38,7 @@ class HomeAdmin extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Welcome, $userRole!',
+              'Welcome, Admin!'.tr(),
               style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -53,13 +54,13 @@ class HomeAdmin extends StatelessWidget {
                 children: [
                   _buildCard(
                     context,
-                    title: 'Register Organizer',
+                    title: 'Register Organizer'.tr(),
                     icon: Icons.person_add,
                     screen: const RegisterOrganizerScreen(),
                   ),
                   _buildCard(
                     context,
-                    title: 'View Analytics',
+                    title: 'View Analytics'.tr(),
                     icon: Icons.bar_chart,
                     screen: const AnalyticsScreen(),
                   ),

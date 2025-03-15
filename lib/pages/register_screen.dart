@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'consts.dart';
 import 'login.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -39,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String phone = phoneController.text.trim();
 
     if (email.isEmpty || password.isEmpty || name.isEmpty || phone.isEmpty) {
-      showError("All fields are required!");
+      showError("All fields are required!".tr());
       return;
     }
 
@@ -66,8 +67,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // Success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Registration Successful! Please log in."),
+        SnackBar(
+          content: Text("Registration Successful! Please log in.".tr()),
           backgroundColor: Colors.green,
         ),
       );
@@ -78,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     } on FirebaseAuthException catch (e) {
-      showError(e.message ?? "Registration failed.");
+      showError(e.message ?? "Registration failed.".tr());
     } finally {
       setState(() {
         _isLoading = false;
@@ -92,7 +93,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text("Register", style: TextStyle(color: Colors.white)),
+        title: Text("Register".tr(), style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       body: Padding(
@@ -100,10 +101,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildCustomTextField(emailController, "Email"),
-              _buildCustomTextField(nameController, "Name"),
-              _buildCustomTextField(phoneController, "Phone Number", TextInputType.phone),
-              _buildCustomTextField(passwordController, "Password", TextInputType.visiblePassword, true),
+              _buildCustomTextField(emailController, "Email".tr()),
+              _buildCustomTextField(nameController, "Name".tr()),
+              _buildCustomTextField(phoneController, "Phone Number".tr(), TextInputType.phone),
+              _buildCustomTextField(passwordController, "Password".tr(), TextInputType.visiblePassword, true),
               const SizedBox(height: 25),
               ElevatedButton(
                 onPressed: _isLoading ? null : _registerUser,
@@ -116,8 +117,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        "Register",
+                    : Text(
+                        "Register".tr(),
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black),
                       ),
               ),
@@ -126,8 +127,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text(
-                  "Already have an account? Login",
+                child: Text(
+                  "Already have an account? Login".tr(),
                   style: TextStyle(fontSize: 15, color: Colors.white),
                 ),
               ),

@@ -6,6 +6,7 @@ import 'login.dart';
 import 'ticket_setup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class HomeOrganizer extends StatefulWidget {
   final String userRole;
@@ -54,7 +55,7 @@ class _HomeOrganizerState extends State<HomeOrganizer> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: const Text('Organizer Dashboard'),
+        title: Text('Organizer Dashboard'.tr()),
         backgroundColor: buttonColor,
         actions: [
           IconButton(
@@ -70,7 +71,7 @@ class _HomeOrganizerState extends State<HomeOrganizer> {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Welcome, $userName!',
+              'welcome_user'.tr(namedArgs: {'userName': userName}),
               style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -86,19 +87,19 @@ class _HomeOrganizerState extends State<HomeOrganizer> {
                 children: [
                   _buildCard(
                     context,
-                    title: 'Event Creation',
+                    title: 'Event Creation'.tr(),
                     icon: Icons.event,
                     screen: CreateEventScreen(userId: userId),
                   ),
                   _buildCard(
                     context,
-                    title: 'View Analytics',
+                    title: 'View Analytics'.tr(),
                     icon: Icons.bar_chart,
                     screen: AnalyticsOrganizerScreen(userId: userId),
                   ),
                   _buildCard(
                     context,
-                    title: 'Ticket Setup',
+                    title: 'Ticket Setup'.tr(),
                     icon: Icons.monetization_on,
                     screen: const TicketSetupScreen(),
                   ),

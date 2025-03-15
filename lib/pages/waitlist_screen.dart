@@ -92,7 +92,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      "cv_writing.jpeg",
+                      "assets/images/cv_writing.jpeg",
                       height: 220,
                       width: 125,
                       fit: BoxFit.cover,
@@ -116,7 +116,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      "bouldering.jpeg",
+                      "assets/images/bouldering.jpeg",
                       height: 220,
                       width: 125,
                       fit: BoxFit.cover,

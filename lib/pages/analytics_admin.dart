@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../calculations/admin_analytics_calculations.dart';
 import 'package:assignment1/pages/consts.dart';
+import "package:easy_localization/easy_localization.dart";
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -46,7 +47,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: const Text('Analytics Dashboard'),
+        title: Text('Analytics Dashboard'.tr()),
         backgroundColor: buttonColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: grey),
@@ -58,8 +59,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Select Timeframe",
+            Text(
+              "Select Timeframe".tr(),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 10),
@@ -90,9 +91,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildStatCard("Auditorium Bookings", _totalBookings.toString(), Icons.event_seat),
-                  _buildStatCard("Events Hosted", _eventsHosted.toString(), Icons.calendar_today),
-                  _buildStatCard("Utilization Rate", "${_utilizationRate.toStringAsFixed(2)}%", Icons.bar_chart),
+                  _buildStatCard("Auditorium Bookings".tr(), _totalBookings.toString(), Icons.event_seat),
+                  _buildStatCard("Events Hosted".tr(), _eventsHosted.toString(), Icons.calendar_today),
+                  _buildStatCard("Utilization Rate".tr(), "${_utilizationRate.toStringAsFixed(2)}%", Icons.bar_chart),
                   const SizedBox(height: 20),
                   _buildBarChart(),
                   const SizedBox(height: 20),
@@ -108,7 +109,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   await generatePDF(selectedTimeframe, _totalBookings, _eventsHosted, _utilizationRate, _eventsHostedOverTime);
                 },
                 icon: const Icon(Icons.download, color: grey),
-                label: const Text("Download Report"),
+                label: Text("Download Report".tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   foregroundColor: grey,
@@ -160,8 +161,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       ),
       child: Column(
         children: [
-          const Text(
-            "Events Hosted Over Time",
+          Text(
+            "Events Hosted Over Time".tr(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
@@ -218,8 +219,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       ),
       child: Column(
         children: [
-          const Text(
-            "Utilization Rate",
+          Text(
+            "Utilization Rate".tr(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
@@ -250,9 +251,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem(Colors.blueAccent, "Utilized"),
+              _buildLegendItem(Colors.blueAccent, "Utilized".tr()),
               const SizedBox(width: 20),
-              _buildLegendItem(Colors.grey, "Not Utilized"),
+              _buildLegendItem(Colors.grey, "Not Utilized".tr()),
             ],
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:assignment1/pages/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:easy_localization/easy_localization.dart';
 // import '../calculations/organizer_analytics_calculations.dart';
 
 class AnalyticsOrganizerScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: const Text('Sales & Revenue Reports'),
+        title: Text('Sales & Revenue Reports').tr(),
         backgroundColor: buttonColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: grey),
@@ -42,16 +43,16 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
             }
 
             if (snapshot.hasError) {
-              return const Center(child: Text("Error loading data", style: TextStyle(color: Colors.white)));
+              return Center(child: Text("Error loading data".tr(), style: TextStyle(color: Colors.white)));
             }
 
             var data = snapshot.data ?? {};
 
             return ListView(
               children: [
-                _buildStatCard("Total Revenue", "RM ${data['totalRevenue']}", Icons.attach_money),
-                _buildStatCard("Total Tickets Sold", "${data['totalTicketsSold']}", Icons.confirmation_number),
-                _buildStatCard("Seat Occupancy", "${data['seatOccupancy']}%", Icons.event_seat),
+                _buildStatCard("Total Revenue".tr(), "RM ${data['totalRevenue']}", Icons.attach_money),
+                _buildStatCard("Total Tickets Sold".tr(), "${data['totalTicketsSold']}", Icons.confirmation_number),
+                _buildStatCard("Seat Occupancy".tr(), "${data['seatOccupancy']}%", Icons.event_seat),
                 const SizedBox(height: 20),
                 _buildBarChart(),
                 const SizedBox(height: 20),
@@ -101,8 +102,8 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
       ),
       child: Column(
         children: [
-          const Text(
-            "Monthly Ticket Sales",
+          Text(
+            "Monthly Ticket Sales".tr(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
@@ -144,8 +145,8 @@ class _AnalyticsOrganizerScreenState extends State<AnalyticsOrganizerScreen> {
       ),
       child: Column(
         children: [
-          const Text(
-            "Seat Occupancy Breakdown",
+          Text(
+            "Seat Occupancy Breakdown".tr(),
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 10),
