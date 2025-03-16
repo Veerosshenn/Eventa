@@ -92,9 +92,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text("Register".tr(), style: TextStyle(color: Colors.white)),
+        backgroundColor: buttonColor,
+        title: Text("Register".tr(), style: TextStyle(color: grey)),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: grey),
+          onPressed: () => Navigator.pop(context), 
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
