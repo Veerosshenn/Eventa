@@ -48,11 +48,18 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
 
     if (pickedTime != null) {
+      // Convert TimeOfDay to a DateTime object
+      final now = DateTime.now();
+      final selectedDateTime = DateTime(now.year, now.month, now.day, pickedTime.hour, pickedTime.minute);
+
+      // Format time in 12-hour format without localization influence
+      final formattedTime = DateFormat('hh:mm a', 'en_US').format(selectedDateTime); 
+
       setState(() {
         if (isStartTime) {
-          startTimeController.text = pickedTime.format(context);
+          startTimeController.text = formattedTime;
         } else {
-          endTimeController.text = pickedTime.format(context);
+          endTimeController.text = formattedTime;
         }
       });
     }
