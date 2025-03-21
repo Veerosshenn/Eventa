@@ -94,5 +94,10 @@
     "Promo Expiry Date": "Promo Expiry Date",
     "No ticket categories selected.": "No ticket categories selected.",
     "Available": "Available",
-    "Locked": "Locked"  
+    "Locked": "Locked",
+    "What's available now": "What's available now",
+    "No events available": "No events available",
+    "Search": "Search",
+    "hello_user": "Hello, {userName}",
+    "Relax, book your tickets, and enjoy the events!": "Relax, book your tickets, and enjoy the events!"
 }

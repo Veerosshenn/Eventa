@@ -8,13 +8,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     EasyLocalization(
       supportedLocales: [Locale('en'), Locale('zh')],
-      path: 'assets/translations', 
+      path: 'assets/translations',
       fallbackLocale: Locale('en'),
       child: MyApp(),
     ),
@@ -27,15 +25,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-  debugShowCheckedModeBanner: false,
-  localizationsDelegates: [
-    ...context.localizationDelegates,
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ],
-  supportedLocales: context.supportedLocales,
-  locale: context.locale,
-  home: LoginScreen(),
-);
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: [
+        ...context.localizationDelegates,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      home: LoginScreen(),
+    );
   }
 }
