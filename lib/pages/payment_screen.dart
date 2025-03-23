@@ -10,7 +10,7 @@ class PaymentScreen extends StatefulWidget {
   final String ticketType;
   final int ticketAmount;
   final String selectedSeats;
-  final String eventTitle; // Assuming you have the event title
+  final String eventName; // Assuming you have the event title
   final String eventPoster; // Assuming you have the event poster URL
 
   const PaymentScreen({
@@ -19,7 +19,7 @@ class PaymentScreen extends StatefulWidget {
     required this.ticketType,
     required this.ticketAmount,
     required this.selectedSeats,
-    required this.eventTitle, // Pass the event title
+    required this.eventName, // Pass the event title
     required this.eventPoster, // Pass the event poster URL
   });
 
@@ -71,10 +71,29 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       final userId = FirebaseAuth.instance.currentUser!.uid;
 
+      // Reference to the event document
+      final eventDocRef = _firestore.collection('events').doc(widget.eventName);
+
+      // Split the selectedSeats by commas and trim any extra spaces around each seat
+      List<String> selectedSeatsList = widget.selectedSeats
+          .split(',')
+          .map((seat) => seat.trim()) // Remove leading/trailing spaces
+          .toList();
+
+      // Create a list of seat names with the format "v-1", "v-2", etc.
+      List<String> bookedSeats =
+          selectedSeatsList.map((seat) => "$seat").toList();
+
+      // Update the bookedSeats array with the selected seats
+      await eventDocRef.update({
+        'ticketSetup.bookedSeats': FieldValue.arrayUnion(bookedSeats),
+      });
+
+      // Save the user's booking details to the user's document
       await _firestore.collection('users').doc(userId).update({
         'bookedTicket': FieldValue.arrayUnion([
           {
-            'title': widget.eventTitle,
+            'title': widget.eventName,
             'poster': widget.eventPoster,
             'ticketAmount': widget.ticketAmount,
             'totalAmount': widget.totalAmount,
@@ -187,8 +206,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         });
                       },
                     ),
-                    const Text(
-                      "Debit Card",
+                    Text(
+                      "Debit Card".tr(),
                       style: TextStyle(color: Colors.white),
                     ),
                   ],
@@ -210,8 +229,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         });
                       },
                     ),
-                    const Text(
-                      "Credit Card",
+                    Text(
+                      "Credit Card".tr(),
                       style: TextStyle(color: Colors.white),
                     ),
                   ],
@@ -233,15 +252,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         });
                       },
                     ),
-                    const Text(
-                      "E-Wallet",
+                    Text(
+                      "E-Wallet".tr(),
                       style: TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
             Center(
               child: MaterialButton(
                 onPressed: () {

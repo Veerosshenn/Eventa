@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text("Profile", style: TextStyle(color: Colors.white)),
+        title: Text("Profile".tr(), style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       body: Padding(

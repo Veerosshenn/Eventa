@@ -39,11 +39,11 @@ class EventDetailScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Hero(
-                      tag: eventData['poster'],
+                      tag: eventData['posterUrl'],
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(25),
                         child: Image.network(
-                          eventData['poster'],
+                          eventData['posterUrl'],
                         ),
                       ),
                     ),
@@ -74,7 +74,7 @@ class EventDetailScreen extends StatelessWidget {
                 height: 20,
               ),
               Text(
-                eventData['title'],
+                eventData['eventName'],
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,

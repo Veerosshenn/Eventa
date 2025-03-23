@@ -17,9 +17,8 @@ class _HomeScreenState extends State<HomeScreen> {
   double pageOffset = 1;
   int currentIndex = 1;
   String userName = "User";
-  bool isUserNameFetched = false; // Track if the username is already fetched
-  late Stream<List<Map<String, dynamic>>>
-      eventStream; // Stream to hold the events
+  bool isUserNameFetched = false;
+  late Stream<List<Map<String, dynamic>>> eventStream;
 
   @override
   void initState() {
@@ -39,7 +38,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> fetchUserName() async {
     if (!isUserNameFetched) {
-      // Only fetch once
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -48,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
             .get();
         setState(() {
           userName = userDoc['name'] ?? "User";
-          isUserNameFetched = true; // Mark username as fetched
+          isUserNameFetched = true;
         });
       }
     }
@@ -117,30 +115,50 @@ class _HomeScreenState extends State<HomeScreen> {
                           currentIndex = index % events.length;
                         });
                       },
-                      itemCount: events
-                          .length, // Set item count to the number of events
+                      itemCount: events.length,
                       itemBuilder: (context, index) {
-                        final event = events[index % events.length];
+                        final event = events[index];
+
+                        // Check if event is null
+                        if (event.isEmpty || !event.containsKey('posterUrl')) {
+                          print("Error: Event data is missing or null: $event");
+                          return Center(
+                              child: Text("Event data unavailable".tr()));
+                        }
 
                         return GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    EventDetailScreen(eventData: event),
-                              ),
-                            );
+                            print("Event Data: $event");
+                            if (event != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      EventDetailScreen(eventData: event),
+                                ),
+                              );
+                            } else {
+                              print("Error: Event data is null");
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(25),
                               child: Image.network(
-                                event['posterUrl'],
+                                event['posterUrl'] ?? '',
                                 height: 400,
                                 width: 80,
                                 fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    height: 400,
+                                    width: 80,
+                                    color: Colors.grey[300],
+                                    child: Icon(Icons.image_not_supported,
+                                        color: Colors.grey[600]),
+                                  );
+                                },
                               ),
                             ),
                           ),
