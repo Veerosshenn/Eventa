@@ -1,1 +1,28 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"eventa-db16a","appId":"1:933945132412:android:77e6ba167a40d9dea910f9","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"eventa-db16a","configurations":{"android":"1:933945132412:android:77e6ba167a40d9dea910f9","ios":"1:933945132412:ios:3a41afee99794e74a910f9","macos":"1:933945132412:ios:3a41afee99794e74a910f9","web":"1:933945132412:web:af6e0d01c6857b3da910f9","windows":"1:933945132412:web:68974fd1863de84ca910f9"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "eventa-db16a",
+          "appId": "1:933945132412:android:77e6ba167a40d9dea910f9",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "eventa-db16a",
+          "configurations": {
+            "android": "1:933945132412:android:77e6ba167a40d9dea910f9",
+            "ios": "1:933945132412:ios:3a41afee99794e74a910f9",
+            "macos": "1:933945132412:ios:3a41afee99794e74a910f9",
+            "web": "1:933945132412:web:af6e0d01c6857b3da910f9",
+            "windows": "1:933945132412:web:68974fd1863de84ca910f9"
+          }
+        }
+      }
+    }
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

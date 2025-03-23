@@ -17,6 +17,9 @@ class _HomeScreenState extends State<HomeScreen> {
   double pageOffset = 1;
   int currentIndex = 1;
   String userName = "User";
+  bool isUserNameFetched = false; // Track if the username is already fetched
+  late Stream<List<Map<String, dynamic>>>
+      eventStream; // Stream to hold the events
 
   @override
   void initState() {
@@ -27,19 +30,27 @@ class _HomeScreenState extends State<HomeScreen> {
           pageOffset = controller.page!;
         });
       });
+
+    // Initialize the event stream
+    eventStream = fetchEvents();
+
     fetchUserName();
   }
 
   Future<void> fetchUserName() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      setState(() {
-        userName = userDoc['name'] ?? "User";
-      });
+    if (!isUserNameFetched) {
+      // Only fetch once
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        setState(() {
+          userName = userDoc['name'] ?? "User";
+          isUserNameFetched = true; // Mark username as fetched
+        });
+      }
     }
   }
 
@@ -51,10 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (snapshot.docs.isEmpty) {
         print("No events found in Firestore.");
       }
-      // Return the raw data (map) from the Firestore document.
-      return snapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
-          .toList();
+      return snapshot.docs.map((doc) => doc.data()).toList();
     });
   }
 
@@ -74,80 +82,76 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 35),
           searchField(),
           const SizedBox(height: 40),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              "What's available now".tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          const SizedBox(height: 50),
           Expanded(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    "What's available now".tr(),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 50),
-                Expanded(
-                    child: StreamBuilder<List<Map<String, dynamic>>>(
-                  stream: fetchEvents(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(child: Text("No events available".tr()));
-                    }
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream: eventStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text("No events available".tr()));
+                }
 
-                    List<Map<String, dynamic>> events = snapshot.data!;
+                List<Map<String, dynamic>> events = snapshot.data!;
 
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        PageView.builder(
-                          controller: controller,
-                          onPageChanged: (index) {
-                            setState(() {
-                              currentIndex = index % events.length;
-                            });
-                          },
-                          itemCount: events.length,
-                          itemBuilder: (context, index) {
-                            final event = events[index % events.length];
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    PageView.builder(
+                      controller: controller,
+                      onPageChanged: (index) {
+                        setState(() {
+                          currentIndex = index % events.length;
+                        });
+                      },
+                      itemCount: events
+                          .length, // Set item count to the number of events
+                      itemBuilder: (context, index) {
+                        final event = events[index % events.length];
 
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) =>
-                                          EventDetailScreen(eventData: event)),
-                                );
-                              },
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 20),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.network(
-                                    event['posterUrl'],
-                                    height: 400,
-                                    width: 80,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    EventDetailScreen(eventData: event),
                               ),
                             );
                           },
-                        ),
-                      ],
-                    );
-                  },
-                ))
-              ],
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(25),
+                              child: Image.network(
+                                event['posterUrl'],
+                                height: 400,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
             ),
-          )
+          ),
         ],
       ),
     );
