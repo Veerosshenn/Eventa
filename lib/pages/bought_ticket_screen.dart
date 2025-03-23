@@ -1,33 +1,31 @@
-import 'consts.dart';
+import 'package:assignment1/pages/consts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../models/event_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BoughtTicketScreen extends StatelessWidget {
-  final List<Event> events = [
-    Event(
-      title: "Music Festival 2025",
-      location: "Stadium A, KL",
-      duration: 180,
-      poster: "assets/images/music_festival.jpeg",
-      description:
-          "Join us for an exciting music festival featuring top artists from around the world.",
-      price: 20,
-      time: "8:00 p.m.",
-    ),
-    Event(
-      title: "Tech Conference",
-      location: "Convention Center",
-      duration: 300,
-      poster: "assets/images/tech_conference.jpeg",
-      description:
-          "Explore the latest tech innovations at this year’s tech conference.",
-      price: 50,
-      time: "9:00 a.m.",
-    ),
-  ];
+  // Fetch the user's booked tickets from Firestore
+  Future<List<Map<String, dynamic>>> getBookedTickets() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return [];
+    }
 
-  void showTicketPopup(BuildContext context, Event event) {
-    bool canCancel = event.time != '';
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    if (userDoc.exists) {
+      List<dynamic> bookedTickets = userDoc['bookedTicket'] ?? [];
+      return bookedTickets
+          .map((ticket) => ticket as Map<String, dynamic>)
+          .toList();
+    }
+    return [];
+  }
+
+  void showTicketPopup(BuildContext context, Map<String, dynamic> event) {
+    bool canCancel = event['startTime'] != '';
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -77,65 +75,81 @@ class BoughtTicketScreen extends StatelessWidget {
         title: Text("My Tickets", style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: events.map((event) {
-            return GestureDetector(
-              onTap: () => showTicketPopup(context, event),
-              child: Container(
-                margin: EdgeInsets.only(bottom: 20),
-                padding: EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: Color(0xFF2A2A2A),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: getBookedTickets(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No tickets found'));
+          } else {
+            final events = snapshot.data!;
+            return Padding(
+              padding: EdgeInsets.all(20),
+              child: ListView.builder(
+                itemCount: events.length,
+                itemBuilder: (context, index) {
+                  final event = events[index];
+                  return GestureDetector(
+                    onTap: () => showTicketPopup(context, event),
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 20),
+                      padding: EdgeInsets.all(15),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF2A2A2A),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Row(
                         children: [
-                          Text(
-                            event.title,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  event['title'],
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  event['location'],
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  event['date'],
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  event['description'],
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ],
+                            ),
                           ),
-                          SizedBox(height: 5),
-                          Text(
-                            event.location,
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            "${event.duration} mins",
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            event.description,
-                            style: TextStyle(color: Colors.white70),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.network(
+                              event['poster'],
+                              height: 100,
+                              width: 100,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: Image.asset(
-                        event.poster,
-                        height: 100,
-                        width: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             );
-          }).toList(),
-        ),
+          }
+        },
       ),
     );
   }

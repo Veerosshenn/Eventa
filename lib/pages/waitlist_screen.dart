@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'consts.dart';
 import 'main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Add Firebase Auth import
 
 class WaitlistScreen extends StatefulWidget {
   @override
@@ -10,18 +13,54 @@ class WaitlistScreen extends StatefulWidget {
 class _WaitlistScreenState extends State<WaitlistScreen> {
   String? selectedEvent;
   bool isWaitlisted = false;
+  List<Map<String, dynamic>> events = [];
 
-  void joinWaitlist() {
+  @override
+  void initState() {
+    super.initState();
+    fetchEvents();
+  }
+
+  void fetchEvents() async {
+    FirebaseFirestore.instance.collection('events').get().then((snapshot) {
+      setState(() {
+        events = snapshot.docs
+            .map((doc) => doc.data())
+            .where((event) => (event['bookedSeats'] as List).length == 300)
+            .toList();
+      });
+    });
+  }
+
+  void joinWaitlist() async {
     if (selectedEvent != null) {
       setState(() {
         isWaitlisted = true;
       });
+
+      // Get the selected event details
+      var selectedEventDetails =
+          events.firstWhere((event) => event['title'] == selectedEvent);
+
+      // Get the current user's UID from FirebaseAuth
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+
+      // Add the selected event to the user's waiting list array
+      FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'waitingList': FieldValue.arrayUnion([
+          {
+            'title': selectedEventDetails['title'],
+            'posterUrl': selectedEventDetails['posterUrl'],
+          },
+        ])
+      });
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Waitlist Confirmation"),
-          content:
-              Text("You have been added to the waitlist for $selectedEvent."),
+          title: Text("Waitlist Confirmation".tr()),
+          content: Text(
+              "${"You have been added to the waitlist for ".tr()}$selectedEvent."),
           actions: [
             TextButton(
               onPressed: () {
@@ -30,7 +69,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                   (Route<dynamic> route) => false,
                 );
               },
-              child: Text("OK"),
+              child: Text("OK".tr()),
             ),
           ],
         ),
@@ -38,16 +77,35 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
     }
   }
 
-  void leaveWaitlist() {
+  void leaveWaitlist() async {
     if (isWaitlisted) {
       setState(() {
         isWaitlisted = false;
       });
+
+      // Get the selected event details
+      var selectedEventDetails =
+          events.firstWhere((event) => event['title'] == selectedEvent);
+
+      // Get the current user's UID from FirebaseAuth
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+
+      // Remove the selected event from the user's waiting list array
+      FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'waitingList': FieldValue.arrayRemove([
+          {
+            'title': selectedEventDetails['title'],
+            'posterUrl': selectedEventDetails['posterUrl'],
+          },
+        ])
+      });
+
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Waitlist Update"),
-          content: Text("You have left the waitlist for $selectedEvent."),
+          title: Text("Waitlist Update".tr()),
+          content:
+              Text("${"You have left the waitlist for ".tr()}$selectedEvent."),
           actions: [
             TextButton(
               onPressed: () {
@@ -56,7 +114,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                   (Route<dynamic> route) => false,
                 );
               },
-              child: Text("OK"),
+              child: Text("OK".tr()),
             ),
           ],
         ),
@@ -70,7 +128,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text("Waitlist", style: TextStyle(color: Colors.white)),
+        title: Text("Waitlist".tr(), style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
       body: Padding(
@@ -78,61 +136,40 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Sold-Out Events",
+            Text("Sold-Out Events".tr(),
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            GestureDetector(
-              onTap: () =>
-                  setState(() => selectedEvent = "CV Writing Techniques"),
-              child: Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      "assets/images/cv_writing.jpeg",
-                      height: 220,
-                      width: 125,
-                      fit: BoxFit.cover,
+            ...events.map((event) {
+              String eventTitle = event['title'];
+              String eventImage = event['posterUrl'];
+              return GestureDetector(
+                onTap: () => setState(() => selectedEvent = eventTitle),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.network(
+                        eventImage,
+                        height: 220,
+                        width: 125,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
-                  RadioListTile(
-                    title: Text("CV Writing Techniques",
-                        style: TextStyle(color: Colors.white)),
-                    value: "CV Writing Techniques",
-                    groupValue: selectedEvent,
-                    onChanged: (value) =>
-                        setState(() => selectedEvent = value as String),
-                  ),
-                ],
-              ),
-            ),
-            GestureDetector(
-              onTap: () => setState(() => selectedEvent = "Bouldering is Fun"),
-              child: Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      "assets/images/bouldering.jpeg",
-                      height: 220,
-                      width: 125,
-                      fit: BoxFit.cover,
+                    RadioListTile(
+                      title: Text(eventTitle,
+                          style: TextStyle(color: Colors.white)),
+                      value: eventTitle,
+                      groupValue: selectedEvent,
+                      onChanged: (value) =>
+                          setState(() => selectedEvent = value as String),
                     ),
-                  ),
-                  RadioListTile(
-                    title: Text("Bouldering is Fun",
-                        style: TextStyle(color: Colors.white)),
-                    value: "Bouldering is Fun",
-                    groupValue: selectedEvent,
-                    onChanged: (value) =>
-                        setState(() => selectedEvent = value as String),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }).toList(),
             SizedBox(height: 40),
             Center(
               child: MaterialButton(
@@ -145,7 +182,9 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 60),
                   child: Center(
                     child: Text(
-                      isWaitlisted ? "Leave Waitlist" : "Join Waitlist",
+                      isWaitlisted
+                          ? "Leave Waitlist".tr()
+                          : "Join Waitlist".tr(),
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,

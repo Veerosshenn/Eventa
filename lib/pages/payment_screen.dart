@@ -1,5 +1,8 @@
-import 'consts.dart';
-import 'main_screen.dart';
+import 'package:assignment1/pages/consts.dart';
+import 'package:assignment1/pages/main_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -7,6 +10,8 @@ class PaymentScreen extends StatefulWidget {
   final String ticketType;
   final int ticketAmount;
   final String selectedSeats;
+  final String eventTitle; // Assuming you have the event title
+  final String eventPoster; // Assuming you have the event poster URL
 
   const PaymentScreen({
     super.key,
@@ -14,6 +19,8 @@ class PaymentScreen extends StatefulWidget {
     required this.ticketType,
     required this.ticketAmount,
     required this.selectedSeats,
+    required this.eventTitle, // Pass the event title
+    required this.eventPoster, // Pass the event poster URL
   });
 
   @override
@@ -26,18 +33,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String selectedPaymentMethod = "Credit Card";
   bool paymentSuccessful = false;
 
+  // Reference to Firestore
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   void handlePayment() {
     setState(() {
       paymentSuccessful = true;
     });
 
+    // Save booking details to Firestore
+    saveBookingDetails();
+
     Future.delayed(const Duration(seconds: 1), () {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text("Payment Success"),
+          title: Text("Payment Success".tr()),
           content:
-              const Text("Your payment was successful. Check your profile."),
+              Text("Your payment was successful. Check your profile.".tr()),
           actions: [
             TextButton(
               onPressed: () {
@@ -46,12 +59,33 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   (Route<dynamic> route) => false,
                 );
               },
-              child: const Text("OK"),
+              child: Text("OK".tr()),
             ),
           ],
         ),
       );
     });
+  }
+
+  Future<void> saveBookingDetails() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser!.uid;
+
+      await _firestore.collection('users').doc(userId).update({
+        'bookedTicket': FieldValue.arrayUnion([
+          {
+            'title': widget.eventTitle,
+            'poster': widget.eventPoster,
+            'ticketAmount': widget.ticketAmount,
+            'totalAmount': widget.totalAmount,
+            'ticketType': widget.ticketType,
+            'selectedSeats': widget.selectedSeats,
+          }
+        ]),
+      });
+    } catch (e) {
+      print("Error saving booking details: $e");
+    }
   }
 
   @override
@@ -60,8 +94,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text(
-          "Payment",
+        title: Text(
+          "Payment".tr(),
           style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
@@ -94,8 +128,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  const Text(
-                    "Ticket Summary",
+                  Text(
+                    "Ticket Summary".tr(),
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -103,20 +137,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Ticket Type: ${widget.ticketType}",
+                    "${"Ticket Type: ".tr()}${widget.ticketType}",
                     style: const TextStyle(fontSize: 16, color: Colors.black),
                   ),
                   Text(
-                    "Ticket Number: ${widget.selectedSeats}",
+                    "${"Ticket Number: ".tr()}${widget.selectedSeats}",
                     style: const TextStyle(fontSize: 16, color: Colors.black),
                   ),
                   Text(
-                    "Amount of Ticket: ${(widget.ticketAmount)}",
+                    "${"Amount of Ticket: ".tr()}${(widget.ticketAmount)}",
                     style: const TextStyle(fontSize: 16, color: Colors.black),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Total Amount: RM ${widget.totalAmount}",
+                    "${"Total Amount: RM ".tr()}${widget.totalAmount}",
                     style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -126,8 +160,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
             const SizedBox(height: 30),
-            const Text(
-              "Select Payment Method:",
+            Text(
+              "Select Payment Method:".tr(),
               style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -223,11 +257,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     borderRadius: BorderRadius.circular(40)),
                 color: Colors.green,
                 height: 70,
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 60),
                   child: Center(
                     child: Text(
-                      "Pay Now",
+                      "Pay Now".tr(),
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,

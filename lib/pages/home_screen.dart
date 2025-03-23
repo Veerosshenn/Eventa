@@ -1,6 +1,4 @@
-import 'dart:math';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:assignment1/models/event_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    controller = PageController(initialPage: 1, viewportFraction: 0.6)
+    controller = PageController(initialPage: 1)
       ..addListener(() {
         setState(() {
           pageOffset = controller.page!;
@@ -45,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Stream<List<Event>> fetchEvents() {
+  Stream<List<Map<String, dynamic>>> fetchEvents() {
     return FirebaseFirestore.instance
         .collection('events')
         .snapshots()
@@ -53,7 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
       if (snapshot.docs.isEmpty) {
         print("No events found in Firestore.");
       }
-      return snapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
+      // Return the raw data (map) from the Firestore document.
+      return snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
     });
   }
 
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 50),
                 Expanded(
-                    child: StreamBuilder<List<Event>>(
+                    child: StreamBuilder<List<Map<String, dynamic>>>(
                   stream: fetchEvents(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return Center(child: Text("No events available".tr()));
                     }
 
-                    List<Event> events = snapshot.data!;
+                    List<Map<String, dynamic>> events = snapshot.data!;
 
                     return Stack(
                       alignment: Alignment.center,
@@ -113,17 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                           itemCount: events.length,
                           itemBuilder: (context, index) {
-                            double scale =
-                                0.6 + (1 - (pageOffset - index).abs()) * 0.4;
-                            double angle = (controller.position.haveDimensions
-                                    ? index.toDouble() - (controller.page ?? 0)
-                                    : index.toDouble() - 1) *
-                                5;
-                            angle = angle.clamp(-5, 5);
-
-                            final event = events[index];
-                            print(
-                                "Image URL for event ${event.title}: ${event.poster}");
+                            final event = events[index % events.length];
 
                             return GestureDetector(
                               onTap: () {
@@ -131,57 +122,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (_) =>
-                                          EventDetailScreen(event: event)),
+                                          EventDetailScreen(eventData: event)),
                                 );
                               },
                               child: Padding(
-                                padding: EdgeInsets.only(
-                                    top: 100 - (scale / 1.6 * 100)),
-                                child: Stack(
-                                  alignment: Alignment.topCenter,
-                                  children: [
-                                    Transform.rotate(
-                                      angle: angle * pi / 90,
-                                      child: Hero(
-                                        tag: event.poster,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(25),
-                                          child: Image.network(
-                                            event.poster,
-                                            height: 300,
-                                            width: 205,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Image.network(
+                                    event['posterUrl'],
+                                    height: 400,
+                                    width: 80,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             );
                           },
                         ),
-                        Positioned(
-                          top: 330,
-                          child: Row(
-                            children: List.generate(
-                              events.length,
-                              (index) => AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                margin: const EdgeInsets.only(right: 15),
-                                width: currentIndex == index ? 30 : 10,
-                                height: 10,
-                                decoration: BoxDecoration(
-                                  color: currentIndex == index
-                                      ? buttonColor
-                                      : Colors.white24,
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
                       ],
                     );
                   },
@@ -228,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const SizedBox(height: 5),
                   Text(
-                    "hello_user".tr(args: [userName]),
+                    "hello_user".tr(namedArgs: {'userName': userName}),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -248,35 +207,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1,
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: Row(
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      context.setLocale(const Locale('en'));
-                    },
-                    child:
-                        const Text("EN", style: TextStyle(color: Colors.white)),
-                  ),
-                  const SizedBox(
-                    height: 25,
-                    child: VerticalDivider(
-                      color: Colors.white,
-                      thickness: 1,
-                      width: 20,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      context.setLocale(const Locale('zh'));
-                    },
-                    child:
-                        const Text("中文", style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),

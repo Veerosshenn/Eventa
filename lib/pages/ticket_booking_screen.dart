@@ -1,12 +1,12 @@
-import '../models/event_model.dart';
-import '../models/seats_model.dart';
-import 'consts.dart';
-import 'payment_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'payment_screen.dart';
+import 'consts.dart';
 
 class TicketBookingScreen extends StatefulWidget {
-  final Event event;
-  const TicketBookingScreen({super.key, required this.event});
+  final Map<String, dynamic>
+      eventData; // Updated to use a Map for event details
+  const TicketBookingScreen({super.key, required this.eventData});
 
   @override
   State<TicketBookingScreen> createState() => _TicketBookingScreenState();
@@ -16,8 +16,18 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
   String? selectedCat;
   double ticketPrice = 0.0;
   List<String> selectedSeats = [];
+  List<String> reversedSeats = [];
   TextEditingController promoCodeController = TextEditingController();
   String promoCodeMessage = "";
+
+  List<String> generateSeatOptions() {
+    List<String> seatOptions = [];
+    for (var category in widget.eventData['seatsByCategory'].keys) {
+      List<String> seats = widget.eventData['seatsByCategory'][category] ?? [];
+      seatOptions.addAll(seats);
+    }
+    return seatOptions;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +36,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
-        title: const Text(
-          "Select Seats",
+        title: Text(
+          "Select Seats".tr(),
           style: TextStyle(
             fontSize: 15,
             color: Colors.white,
@@ -38,7 +48,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 30),
+          const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Image.asset(
@@ -53,8 +63,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Select Category",
+                Text(
+                  "Select Category".tr(),
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -64,8 +74,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                 const SizedBox(height: 10),
                 DropdownButton<String>(
                   value: selectedCat,
-                  hint: const Text(
-                    "Choose a Category",
+                  hint: Text(
+                    "Choose a Seat".tr(),
                     style: TextStyle(color: Colors.white),
                   ),
                   icon: const Icon(
@@ -74,22 +84,44 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                   ),
                   dropdownColor: Colors.black,
                   isExpanded: true,
-                  items: categories.map((cat) {
+                  items: generateSeatOptions().map((seat) {
                     return DropdownMenuItem<String>(
-                      value: cat,
+                      value: seat,
                       child: Text(
-                        cat,
+                        seat,
                         style: const TextStyle(
                           color: Colors.white,
                         ),
                       ),
                     );
                   }).toList(),
-                  onChanged: (newCat) {
+                  onChanged: (newSeat) {
                     setState(() {
-                      selectedCat = newCat;
+                      selectedCat = newSeat;
                       if (selectedCat != null) {
-                        ticketPrice = widget.event.price;
+                        if (widget.eventData['categoryAvailability']['VIP']!
+                            .contains(newSeat)) {
+                          ticketPrice =
+                              widget.eventData['VIP']['price'][newSeat] ?? 0.0;
+                        } else if (widget.eventData['categoryAvailability']
+                                ['General Admission']!
+                            .contains(newSeat)) {
+                          ticketPrice = widget.eventData['General Asmission']
+                                  ['price'][newSeat] ??
+                              0.0;
+                        } else if (widget.eventData['categoryAvailability']
+                                ['Senior Citizen']!
+                            .contains(newSeat)) {
+                          ticketPrice = widget.eventData['Senior Citizen']
+                                  ['price'][newSeat] ??
+                              0.0;
+                        } else if (widget.eventData['categoryAvailability']
+                                ['Child']!
+                            .contains(newSeat)) {
+                          ticketPrice = widget.eventData['Child']['price']
+                                  [newSeat] ??
+                              0.0;
+                        }
                       }
                     });
                   },
@@ -102,8 +134,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const Text(
-                  "Select your seat:",
+                Text(
+                  "Select your seat:".tr(),
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -122,9 +154,14 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
                     ),
-                    itemCount: seatsByCategory[selectedCat]?.length ?? 0,
+                    itemCount: widget
+                            .eventData['categoryAvailability'][selectedCat]
+                                ['limit']
+                            ?.length ??
+                        0,
                     itemBuilder: (context, index) {
-                      String seatNum = seatsByCategory[selectedCat]![index];
+                      String seatNum =
+                          widget.eventData['bookedSeats'][selectedCat]![index];
                       Color seatColor;
                       if (selectedSeats.contains(seatNum)) {
                         seatColor = buttonColor;
@@ -166,66 +203,14 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          height: 20,
-                          width: 20,
-                          decoration: BoxDecoration(
-                            color: grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        const Text(
-                          "Available",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(width: 20),
-                        Container(
-                          height: 20,
-                          width: 20,
-                          decoration: BoxDecoration(
-                            color: buttonColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        const Text(
-                          "Selected",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(width: 20),
-                        Container(
-                          height: 20,
-                          width: 20,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        const Text(
-                          "Reserved",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                // Promo code handling
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Enter Promotional Code",
+                      Text(
+                        "Enter Promotional Code".tr(),
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -239,7 +224,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.black,
-                          hintText: "Enter promo code",
+                          hintText: "Enter promo code".tr(),
                           hintStyle: const TextStyle(color: Colors.white),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(5),
@@ -249,12 +234,13 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                             icon: const Icon(Icons.check, color: Colors.white),
                             onPressed: () {
                               setState(() {
-                                if (promoCodeController.text == 'DISCOUNT10') {
-                                  promoCodeMessage =
-                                      "Promo code applied! 10% off.";
-                                  ticketPrice *= 0.9;
+                                if (promoCodeController.text ==
+                                    widget.eventData['promo']['code']) {
+                                  promoCodeMessage = "Promo code applied!".tr();
+                                  ticketPrice = ticketPrice /
+                                      widget.eventData['discount'].double;
                                 } else {
-                                  promoCodeMessage = "Invalid promo code.";
+                                  promoCodeMessage = "Invalid promo code.".tr();
                                 }
                               });
                             },
@@ -277,7 +263,7 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Total: RM ${(selectedSeats.length * ticketPrice).toStringAsFixed(2)}",
+                      "${"Total: RM".tr()}${(selectedSeats.length * ticketPrice).toStringAsFixed(2)}",
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -293,15 +279,13 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
-                                title: const Text("No Seats Selected"),
-                                content: const Text(
-                                    "Please select seats before booking."),
+                                title: Text("No Seats Selected".tr()),
+                                content: Text(
+                                    "Please select seats to proceed.".tr()),
                                 actions: [
                                   TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text("OK"),
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text("OK".tr()),
                                   ),
                                 ],
                               ),
@@ -311,11 +295,13 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => PaymentScreen(
-                                  ticketType: selectedCat ?? "",
-                                  ticketAmount: selectedSeats.length,
-                                  selectedSeats: selectedSeats.join(', '),
                                   totalAmount:
                                       selectedSeats.length * ticketPrice,
+                                  ticketType: selectedCat.toString(),
+                                  ticketAmount: selectedSeats.length,
+                                  selectedSeats: selectedSeats.join(', '),
+                                  eventTitle: widget.eventData['title'],
+                                  eventPoster: widget.eventData['posterUrl'],
                                 ),
                               ),
                             );
@@ -323,19 +309,14 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: buttonColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40),
-                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 15),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          child: const Text(
-                            "Book Ticket",
-                            style: TextStyle(
-                              fontSize: 15,
-                              height: 3,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        child: Text(
+                          "Proceed".tr(),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),

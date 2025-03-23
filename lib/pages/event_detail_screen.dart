@@ -1,12 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import '../Widget/event_info.dart';
-import '../models/event_model.dart';
 import 'consts.dart';
 import 'ticket_booking_screen.dart';
 import 'package:flutter/material.dart';
 
 class EventDetailScreen extends StatelessWidget {
-  final Event event;
-  const EventDetailScreen({super.key, required this.event});
+  final Map<String, dynamic> eventData;
+
+  const EventDetailScreen({super.key, required this.eventData});
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +17,8 @@ class EventDetailScreen extends StatelessWidget {
         forceMaterialTransparency: true,
         foregroundColor: Colors.white,
         backgroundColor: Colors.transparent,
-        title: const Text(
-          "Event Detail",
+        title: Text(
+          "Event Detail".tr(),
           style: TextStyle(
             fontSize: 16,
             color: Colors.white,
@@ -38,11 +39,11 @@ class EventDetailScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Hero(
-                      tag: event.poster,
+                      tag: eventData['poster'],
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(25),
-                        child: Image.asset(
-                          event.poster,
+                        child: Image.network(
+                          eventData['poster'],
                         ),
                       ),
                     ),
@@ -51,24 +52,19 @@ class EventDetailScreen extends StatelessWidget {
                       children: [
                         EventInfo(
                           icon: Icons.location_on,
-                          name: "Location",
-                          value: event.location,
+                          name: "Location".tr(),
+                          value: eventData['location'],
                         ),
                         EventInfo(
                           icon: Icons.lock_clock,
-                          name: "Time",
-                          value: event.time,
+                          name: "Time".tr(),
+                          value: eventData['startTime'],
                         ),
                         EventInfo(
-                          icon: Icons.timer,
-                          name: "Duration",
-                          value: formatTime(Duration(minutes: event.duration)),
+                          icon: Icons.edit_calendar_outlined,
+                          name: "Date".tr(),
+                          value: eventData['date'],
                         ),
-                        EventInfo(
-                          icon: Icons.monetization_on,
-                          name: "Price",
-                          value: "RM${event.price}",
-                        )
                       ],
                     )
                   ],
@@ -78,7 +74,7 @@ class EventDetailScreen extends StatelessWidget {
                 height: 20,
               ),
               Text(
-                event.title,
+                eventData['title'],
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -91,8 +87,8 @@ class EventDetailScreen extends StatelessWidget {
                   color: Colors.white.withOpacity(0.1),
                 ),
               ),
-              const Text(
-                "Description",
+              Text(
+                "Description".tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -101,7 +97,7 @@ class EventDetailScreen extends StatelessWidget {
               ),
               SizedBox(height: 15),
               Text(
-                event.description,
+                eventData['description'],
                 style: const TextStyle(
                   fontSize: 13,
                   color: Colors.white60,
@@ -134,7 +130,7 @@ class EventDetailScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => TicketBookingScreen(
-                        event: event,
+                        eventData: eventData,
                       ),
                     ));
               },
@@ -143,11 +139,11 @@ class EventDetailScreen extends StatelessWidget {
               ),
               color: buttonColor,
               height: 70,
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 60),
                 child: Center(
                   child: Text(
-                    "Get Reservation",
+                    "Get Reservation".tr(),
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
