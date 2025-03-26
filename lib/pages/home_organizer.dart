@@ -4,6 +4,7 @@ import 'create_event.dart';
 import 'analytics_organizer.dart';
 import 'login.dart';
 import 'ticket_setup.dart';
+import 'edit_event.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -93,10 +94,16 @@ class _HomeOrganizerState extends State<HomeOrganizer> {
                   ),
                   _buildCard(
                     context,
-                    title: 'View Analytics'.tr(),
-                    icon: Icons.bar_chart,
-                    screen: AnalyticsOrganizerScreen(userId: userId),
+                    title: 'Edit Events'.tr(),
+                    icon: Icons.event_note,
+                    screen: EditEventScreen(userId: userId),
                   ),
+                  // _buildCard(
+                  //   context,
+                  //   title: 'View Analytics'.tr(),
+                  //   icon: Icons.bar_chart,
+                  //   screen: AnalyticsOrganizerScreen(userId: userId),
+                  // ),
                   _buildCard(
                     context,
                     title: 'Ticket Setup'.tr(),

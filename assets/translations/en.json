@@ -156,5 +156,15 @@
     "Proceed to Payment": "Proceed to Payment",
     "Debit Card": "Debit Card",
     "Credit Card": "Credit Card",
-    "E-Wallet": "E-Wallet"
+    "E-Wallet": "E-Wallet",
+    "Edit Events": "Edit Events",
+    "Select Event to Edit": "Select Event to Edit",
+    "Edit Event": "Edit Event",
+    "Update Event": "Update Event",
+    "Event Updated Successfully!": "Event Updated Successfully!",
+    "Tap to edit, long press to delete": "Tap to edit, long press to delete",
+    "Delete Event": "Delete Event",
+    "Are you sure you want to delete this event?": "Are you sure you want to delete this event?",
+    "Delete": "Delete",
+    "Event Deleted Successfully!": "Event Deleted Successfully!"
 }

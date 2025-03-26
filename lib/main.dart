@@ -11,7 +11,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     EasyLocalization(
-      supportedLocales: [Locale('en'), Locale('zh')],
+      supportedLocales: [Locale('en'), Locale('zh'), Locale('th')],
       path: 'assets/translations',
       fallbackLocale: Locale('en'),
       child: MyApp(),
