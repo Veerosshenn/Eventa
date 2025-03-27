@@ -7,26 +7,49 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 
-class CreateEventScreen extends StatefulWidget {
-  final String userId;
-  const CreateEventScreen({super.key, required this.userId});
+class EditEventDetailScreen extends StatefulWidget {
+  final DocumentSnapshot eventData;
+  const EditEventDetailScreen({super.key, required this.eventData});
 
   @override
-  _CreateEventScreenState createState() => _CreateEventScreenState();
+  _EditEventScreenState createState() => _EditEventScreenState();
 }
 
-class _CreateEventScreenState extends State<CreateEventScreen> {
-  final TextEditingController eventNameController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-  final TextEditingController startTimeController = TextEditingController();
-  final TextEditingController endTimeController = TextEditingController();
-  final TextEditingController locationNameController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+class _EditEventScreenState extends State<EditEventDetailScreen> {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
 
+  List<DocumentSnapshot> userEvents = [];
+  DocumentSnapshot? selectedEvent;
+
+  final TextEditingController eventNameController = TextEditingController();
+  final TextEditingController locationNameController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
+  final TextEditingController startTimeController = TextEditingController();
+  final TextEditingController endTimeController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
   Uint8List? uploadedFileBytes;
   String? uploadedFileName;
+  String? posterUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEventData();
+  }
+
+  void _loadEventData() {
+    setState(() {
+      eventNameController.text = widget.eventData['eventName'];
+      dateController.text = widget.eventData['date'];
+      startTimeController.text = widget.eventData['startTime'];
+      endTimeController.text = widget.eventData['endTime'];
+      locationNameController.text = widget.eventData['location'] ?? 'Subang 2';
+      descriptionController.text = widget.eventData['description'];
+      posterUrl = widget.eventData['posterUrl'];
+    });
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
@@ -49,12 +72,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
 
     if (pickedTime != null) {
-      // Convert TimeOfDay to a DateTime object
       final now = DateTime.now();
       final selectedDateTime = DateTime(now.year, now.month, now.day, pickedTime.hour, pickedTime.minute);
-
-      // Format time in 12-hour format without localization influence
-      final formattedTime = DateFormat('hh:mm a', 'en_US').format(selectedDateTime); 
+      final formattedTime = DateFormat('hh:mm a', 'en_US').format(selectedDateTime);
 
       setState(() {
         if (isStartTime) {
@@ -82,15 +102,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       Reference ref = storage.ref().child(filePath);
       UploadTask uploadTask = ref.putData(fileBytes);
       TaskSnapshot snapshot = await uploadTask;
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
+      return await snapshot.ref.getDownloadURL();
     } catch (e) {
       print("Error uploading to Firebase Storage: $e");
       return null;
     }
   }
 
-  void _createEvent() async {
+  Future<void> _updateEvent() async {
     if (eventNameController.text.isEmpty ||
         dateController.text.isEmpty ||
         startTimeController.text.isEmpty ||
@@ -103,43 +122,29 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return;
     }
 
-    String? posterUrl;
+    String? newPosterUrl = posterUrl;
     if (uploadedFileBytes != null && uploadedFileName != null) {
-      posterUrl = await _uploadToFirebaseStorage(uploadedFileBytes!, uploadedFileName!);
+      newPosterUrl = await _uploadToFirebaseStorage(uploadedFileBytes!, uploadedFileName!);
     }
 
-    String eventNameKey = eventNameController.text.trim().replaceAll(' ', '_');
-
-    await firestore.collection('events').doc(eventNameKey).set({
+    await firestore.collection('events').doc(widget.eventData.id).update({
       'eventName': eventNameController.text,
       'date': dateController.text,
       'startTime': startTimeController.text,
       'endTime': endTimeController.text,
       'location': locationNameController.text,
       'description': descriptionController.text,
-      'posterUrl': posterUrl ?? '',
-      'createdAt': DateTime.now().toIso8601String(),
-      'createdBy': widget.userId,
+      'posterUrl': newPosterUrl ?? '',
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Event Created Successfully!'.tr()),
+        content: Text('Event Updated Successfully!'.tr()),
         backgroundColor: Colors.green,
       ),
     );
 
-    // Reset fields after event creation
-    eventNameController.clear();
-    dateController.clear();
-    startTimeController.clear();
-    endTimeController.clear();
-    locationNameController.clear();
-    descriptionController.clear();
-    setState(() {
-      uploadedFileBytes = null;
-      uploadedFileName = null;
-    });
+    Navigator.pop(context);
   }
 
   @override
@@ -147,33 +152,20 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     return Scaffold(
       backgroundColor: appBackgroundColor,
       appBar: AppBar(
-        title: Text('Create Event'.tr()),
+        title: Text('Edit Event'.tr()),
         backgroundColor: buttonColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: grey),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildTextField('Event Name'.tr(), eventNameController),
             const SizedBox(height: 12),
             _buildDateTimeField('Select Date'.tr(), dateController, _selectDate),
             const SizedBox(height: 12),
-            _buildDateTimeField(
-              "Start Time".tr(), 
-              startTimeController, 
-              (context) => _selectTime(context, true)
-            ),
+            _buildDateTimeField("Start Time".tr(), startTimeController, (context) => _selectTime(context, true)),
             const SizedBox(height: 12),
-            _buildDateTimeField(
-              "End Time".tr(), 
-              endTimeController, 
-              (context) => _selectTime(context, false)
-            ),
+            _buildDateTimeField("End Time".tr(), endTimeController, (context) => _selectTime(context, false)),
             const SizedBox(height: 12),
             _buildTextField('Location'.tr(), locationNameController),
             const SizedBox(height: 12),
@@ -184,9 +176,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _createEvent,
-                icon: const Icon(Icons.event_available, color: grey),
-                label: Text("Create Event".tr()),
+                onPressed: _updateEvent,
+                icon: const Icon(Icons.update, color: grey),
+                label: Text("Update Event".tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: buttonColor,
                   foregroundColor: grey,

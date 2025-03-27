@@ -166,6 +166,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text("中文", style: TextStyle(color: Colors.white)),
                 ),
+                SizedBox(
+                  height: 25, 
+                  child: VerticalDivider(
+                    color: Colors.white,
+                    thickness: 1,
+                    width: 20,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    context.setLocale(Locale('th'));
+                  },
+                  child: Text("ไทย", style: TextStyle(color: Colors.white)),
+                )
               ],
             ),
           ),

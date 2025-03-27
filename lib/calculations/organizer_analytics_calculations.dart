@@ -1,61 +1,70 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// class OrganizerAnalyticsCalculations {
-//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-//   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+class OrganizerAnalyticsCalculations {
+  Future<Map<String, dynamic>> fetchAnalyticsOrganizerScreen(String userId) async {
+    try {
+      QuerySnapshot eventSnapshot = await FirebaseFirestore.instance
+          .collection('events')
+          .where('createdBy', isEqualTo: userId)
+          .get();
 
-//   Future<Map<String, dynamic>> fetchAnalyticsData(String currentUserId) async {
-//     try {
-//       print("Fetching data for user: $currentUserId");
+      double totalRevenue = 0;
+      int totalTicketsSold = 0;
+      int totalAvailableSeats = 0;
 
-//       final snapshot = await _firestore
-//           .collection("events")
-//           .where("createdBy", isEqualTo: currentUserId)
-//           .get();
+      for (var doc in eventSnapshot.docs) {
+        var data = doc.data() as Map<String, dynamic>;
 
-//       print("Total Events: ${snapshot.docs.length}");
+        List<String> bookedSeats = List<String>.from(data['bookedSeats'] ?? []);
+        totalTicketsSold += bookedSeats.length;
 
-//       if (snapshot.docs.isEmpty) {
-//         print("No events found.");
-//         return {
-//           "revenue": 0.0,
-//           "totalTicketsSold": 0,
-//         };
-//       }
+        Map<String, dynamic> ticketSetup = data['ticketSetup'] ?? {};
+        int generalLimit = int.parse(ticketSetup['generalAdmission']['limit'] ?? '0');
+        double generalPrice = double.parse(ticketSetup['generalAdmission']['price'] ?? '0');
 
-//       double totalRevenue = 0.0;
-//       int totalTicketsSold = 0;
+        int seniorLimit = int.parse(ticketSetup['seniorCitizen']['limit'] ?? '0');
+        double seniorPrice = double.parse(ticketSetup['seniorCitizen']['price'] ?? '0');
 
-//       for (var doc in snapshot.docs) {
-//         final eventData = doc.data();
-//         print("Event Data: $eventData");
+        int vipLimit = int.parse(ticketSetup['vip']['limit'] ?? '0');
+        double vipPrice = double.parse(ticketSetup['vip']['price'] ?? '0');
 
-//         final ticketData = eventData["ticketSetup"] ?? {};
-//         print("Ticket Data: $ticketData");
+        int childLimit = int.parse(ticketSetup['child']['limit'] ?? '0');
+        double childPrice = double.parse(ticketSetup['child']['price'] ?? '0');
 
-//         ticketData.forEach((key, value) {
-//           final price = double.tryParse(value["price"].toString()) ?? 0.0;
-//           final sold = int.tryParse(value["sold"].toString()) ?? 0;
+        totalAvailableSeats += generalLimit + seniorLimit + vipLimit + childLimit;
 
-//           totalRevenue += price * sold;
-//           totalTicketsSold += sold;
-//         });
-//       }
+        double discount = 0;
+        if (ticketSetup.containsKey('promo')) {
+          DateTime expiry = DateTime.parse(ticketSetup['promo']['expiryDate']);
+          if (expiry.isAfter(DateTime.now())) {
+            discount = double.parse(ticketSetup['promo']['discount'] ?? '0');
+          }
+        }
 
-//       print("Total Revenue: $totalRevenue");
-//       print("Total Tickets Sold: $totalTicketsSold");
+        int generalSold = bookedSeats.where((s) => s.startsWith('g-')).length;
+        int seniorSold = bookedSeats.where((s) => s.startsWith('s-')).length;
+        int vipSold = bookedSeats.where((s) => s.startsWith('v-')).length;
+        int childSold = bookedSeats.where((s) => s.startsWith('c-')).length;
 
-//       return {
-//         "revenue": totalRevenue,
-//         "totalTicketsSold": totalTicketsSold,
-//       };
-//     } catch (e) {
-//       print("Error fetching analytics data: $e");
-//       return {
-//         "revenue": 0.0,
-//         "totalTicketsSold": 0,
-//       };
-//     }
-//   }
-// }
+        totalRevenue += (generalSold * generalPrice) +
+            (seniorSold * seniorPrice) +
+            (vipSold * vipPrice) +
+            (childSold * childPrice);
+        totalRevenue -= discount;
+      }
+
+      double seatOccupancy = totalAvailableSeats > 0
+          ? (totalTicketsSold / totalAvailableSeats) * 100
+          : 0;
+
+      return {
+        "totalRevenue": totalRevenue.toStringAsFixed(2),
+        "totalTicketsSold": totalTicketsSold,
+        "seatOccupancy": seatOccupancy.toStringAsFixed(2),
+      };
+    } catch (e) {
+      print("Error fetching analytics: $e");
+      return {"totalRevenue": "0.00", "totalTicketsSold": 0, "seatOccupancy": "0"};
+    }
+  }
+}
