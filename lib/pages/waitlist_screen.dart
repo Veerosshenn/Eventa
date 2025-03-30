@@ -30,7 +30,7 @@ class _WaitlistScreenState extends State<WaitlistScreen> {
         events = snapshot.docs
             .map((doc) => doc.data())
             .where((event) =>
-                (event['ticketSetup']['bookedSeats'] as List).length == 4)
+                (event['ticketSetup']['bookedSeats'] as List).length == 300)
             .toList();
       });
     });

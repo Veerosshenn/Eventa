@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,16 +25,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    controller = PageController(initialPage: 1)
+    controller = PageController(viewportFraction: 0.8)
       ..addListener(() {
         setState(() {
-          pageOffset = controller.page!;
+          pageOffset = controller.page ?? 0;
         });
       });
 
     // Initialize the event stream
     eventStream = fetchEvents();
-
     fetchUserName();
   }
 
@@ -80,96 +81,120 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 35),
           searchField(),
           const SizedBox(height: 40),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              "What's available now".tr(),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-          const SizedBox(height: 50),
           Expanded(
-            child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: eventStream,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text("No events available".tr()));
-                }
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "What's available now".tr(),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 50),
+                Expanded(
+                    child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: eventStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Center(child: Text("No events available".tr()));
+                    }
 
-                List<Map<String, dynamic>> events = snapshot.data!;
+                    List<Map<String, dynamic>> events = snapshot.data!;
 
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    PageView.builder(
-                      controller: controller,
-                      onPageChanged: (index) {
-                        setState(() {
-                          currentIndex = index % events.length;
-                        });
-                      },
-                      itemCount: events.length,
-                      itemBuilder: (context, index) {
-                        final event = events[index];
-
-                        // Check if event is null
-                        if (event.isEmpty || !event.containsKey('posterUrl')) {
-                          print("Error: Event data is missing or null: $event");
-                          return Center(
-                              child: Text("Event data unavailable".tr()));
-                        }
-
-                        return GestureDetector(
-                          onTap: () {
-                            print("Event Data: $event");
-                            if (event != null) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      EventDetailScreen(eventData: event),
-                                ),
-                              );
-                            } else {
-                              print("Error: Event data is null");
-                            }
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        PageView.builder(
+                          controller: controller,
+                          onPageChanged: (index) {
+                            setState(() {
+                              currentIndex = index % events.length;
+                            });
                           },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(25),
-                              child: Image.network(
-                                event['posterUrl'] ?? '',
-                                height: 400,
-                                width: 80,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    height: 400,
-                                    width: 80,
-                                    color: Colors.grey[300],
-                                    child: Icon(Icons.image_not_supported,
-                                        color: Colors.grey[600]),
-                                  );
-                                },
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            double scale =
+                                0.6 + (1 - (pageOffset - index).abs()) * 0.4;
+                            double angle = (controller.position.haveDimensions
+                                    ? index.toDouble() - (controller.page ?? 0)
+                                    : index.toDouble() - 1) *
+                                5;
+                            angle = angle.clamp(-5, 5);
+
+                            final event = events[index];
+
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          EventDetailScreen(eventData: event)),
+                                );
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    top: 100 - (scale / 1.6 * 100)),
+                                child: Stack(
+                                  alignment: Alignment.topCenter,
+                                  children: [
+                                    Transform.rotate(
+                                      angle: angle * pi / 90,
+                                      child: Hero(
+                                        tag: event['posterUrl'],
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(25),
+                                          child: Image.network(
+                                            event['posterUrl'],
+                                            height: 400,
+                                            width: 300,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        Positioned(
+                          top: 500,
+                          child: Row(
+                            children: List.generate(
+                              events.length,
+                              (index) => AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                margin: const EdgeInsets.only(right: 15),
+                                width: currentIndex == index ? 30 : 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  color: currentIndex == index
+                                      ? buttonColor
+                                      : Colors.white24,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
-                  ],
-                );
-              },
+                        )
+                      ],
+                    );
+                  },
+                ))
+              ],
             ),
-          ),
+          )
         ],
       ),
     );
