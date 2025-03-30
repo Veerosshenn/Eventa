@@ -166,5 +166,11 @@
     "Delete Event": "Delete Event",
     "Are you sure you want to delete this event?": "Are you sure you want to delete this event?",
     "Delete": "Delete",
-    "Event Deleted Successfully!": "Event Deleted Successfully!"
+    "Event Deleted Successfully!": "Event Deleted Successfully!",
+    "Organizer Analytics": "Organizer Analytics",
+    "Tickets Sold": "Tickets Sold",
+    "No revenue data available": "No revenue data available",
+    "Occupied": "Occupied",
+    "Vacant": "Vacant",
+    "Revenue Overview": "Revenue Overview"
 }

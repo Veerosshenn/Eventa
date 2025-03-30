@@ -98,17 +98,17 @@ class _HomeOrganizerState extends State<HomeOrganizer> {
                     icon: Icons.event_note,
                     screen: EditEventScreen(userId: userId),
                   ),
-                  // _buildCard(
-                  //   context,
-                  //   title: 'View Analytics'.tr(),
-                  //   icon: Icons.bar_chart,
-                  //   screen: AnalyticsOrganizerScreen(userId: userId),
-                  // ),
                   _buildCard(
                     context,
                     title: 'Ticket Setup'.tr(),
                     icon: Icons.monetization_on,
                     screen: const TicketSetupScreen(),
+                  ),
+                  _buildCard(
+                    context,
+                    title: 'View Analytics'.tr(),
+                    icon: Icons.bar_chart,
+                    screen: OrganizerAnalyticsScreen(userId: userId),
                   ),
                 ],
               ),
