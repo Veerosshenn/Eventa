@@ -60,7 +60,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                       crossAxisCount: 2, // Two columns
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
-                      childAspectRatio: 1.2, // Adjusted height-to-width ratio
+                      childAspectRatio: 1.0, // Adjusted height-to-width ratio
                     ),
                     itemCount: userEvents.length,
                     itemBuilder: (context, index) {

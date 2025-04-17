@@ -103,23 +103,38 @@ Future<void> generatePDF(
   pdf.addPage(
     pw.Page(
       build: (pw.Context context) {
-        return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text("Analytics Report", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Text("Timeframe: $timeframe"),
-            pw.Text("Total Bookings: $totalBookings"),
-            pw.Text("Events Hosted: $eventsHosted"),
-            pw.Text("Utilization Rate: ${utilizationRate.toStringAsFixed(2)}%"),
-            pw.SizedBox(height: 10),
-            pw.Text("Events Hosted Over Time:"),
-            pw.Column(
-              children: eventsHostedOverTime.entries.map((e) {
-                return pw.Text("Month ${e.key + 1}: ${e.value} events");
-              }).toList(),
-            ),
-          ],
+        return pw.Padding(
+          padding: const pw.EdgeInsets.all(24),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text("Admin Analytics Report", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 20),
+              pw.Text("Timeframe: $timeframe", style: pw.TextStyle(fontSize: 14)),
+              pw.SizedBox(height: 10),
+              pw.Text("Summary", style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.Bullet(text: "Total Bookings: $totalBookings"),
+              pw.Bullet(text: "Events Hosted: $eventsHosted"),
+              pw.Bullet(text: "Utilization Rate: ${utilizationRate.toStringAsFixed(2)}%"),
+              pw.SizedBox(height: 20),
+              pw.Text("Monthly Events Breakdown", style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.TableHelper.fromTextArray(
+                headers: ['Month', 'Number of Events'],
+                data: eventsHostedOverTime.entries.map((entry) {
+                  return [
+                    "Month ${entry.key + 1}",
+                    entry.value.toString(),
+                  ];
+                }).toList(),
+                border: pw.TableBorder.all(width: 0.5),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                cellAlignment: pw.Alignment.centerLeft,
+                cellPadding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+              ),
+            ],
+          ),
         );
       },
     ),
@@ -132,10 +147,9 @@ Future<void> generatePDF(
     // Web: Trigger file download
     final blob = html.Blob([pdfBytes]);
     final url = html.Url.createObjectUrlFromBlob(blob);
-    
-    // Create an invisible anchor element and trigger the download
+
     html.AnchorElement(href: url)
-      ..setAttribute("download", "analytics_report.pdf")
+      ..setAttribute("download", "admin_analytics_report.pdf")
       ..click();
 
     html.Url.revokeObjectUrl(url);

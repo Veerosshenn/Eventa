@@ -172,5 +172,7 @@
     "No revenue data available": "No revenue data available",
     "Occupied": "Occupied",
     "Vacant": "Vacant",
-    "Revenue Overview": "Revenue Overview"
+    "Revenue Overview": "Revenue Overview",
+    "PDF generated successfully!": "PDF generated successfully!",
+    "Error generating PDF:": "Error generating PDF:"
 }

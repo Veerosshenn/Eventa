@@ -172,5 +172,7 @@
     "No revenue data available": "暂无收入数据",
     "Occupied": "已占用",
     "Vacant": "空闲",
-    "Revenue Overview": "收入概览"
+    "Revenue Overview": "收入概览",
+    "PDF generated successfully!": "PDF生成成功！",
+    "Error generating PDF:": "生成PDF时出错："
 }

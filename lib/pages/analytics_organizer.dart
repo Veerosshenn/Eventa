@@ -14,6 +14,9 @@ class OrganizerAnalyticsScreen extends StatefulWidget {
 }
 
 class _OrganizerAnalyticsScreenState extends State<OrganizerAnalyticsScreen> {
+  String selectedTimeframe = "Weekly"; 
+  final List<String> timeframes = ["Weekly", "Monthly", "Annual"];
+  
   double _totalRevenue = 0.0;
   int _totalTicketsSold = 0;
   double _seatOccupancy = 0.0;
@@ -28,7 +31,7 @@ class _OrganizerAnalyticsScreenState extends State<OrganizerAnalyticsScreen> {
   void fetchAnalytics() async {
     try {
       final analytics = OrganizerAnalyticsCalculations();
-      final result = await analytics.fetchAnalyticsOrganizerScreen(widget.userId);
+      final result = await analytics.fetchAnalyticsOrganizerScreen(widget.userId, selectedTimeframe);
 
       if (result.isNotEmpty) {
         setState(() {
@@ -62,6 +65,35 @@ class _OrganizerAnalyticsScreenState extends State<OrganizerAnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              "Select Timeframe".tr(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+            const SizedBox(height: 10),
+            Theme(
+              data: Theme.of(context).copyWith(canvasColor: Colors.white),
+              child: DropdownButtonFormField<String>(
+                value: selectedTimeframe,
+                items: timeframes.map((String timeframe) {
+                  return DropdownMenuItem<String>(
+                    value: timeframe,
+                    child: Text(timeframe, style: const TextStyle(color: Colors.black)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedTimeframe = value!;
+                    fetchAnalytics();
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView(
                 children: [
@@ -79,8 +111,23 @@ class _OrganizerAnalyticsScreenState extends State<OrganizerAnalyticsScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // Handle report download
+                onPressed: () async {
+                  try {
+                    await generatePDF(
+                      timeframe: selectedTimeframe,
+                      totalRevenue: _totalRevenue,
+                      totalTicketsSold: _totalTicketsSold,
+                      seatOccupancy: _seatOccupancy,
+                      eventRevenueList: eventRevenueList,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("PDF generated successfully!".tr())),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error generating PDF: $e".tr())),
+                    );
+                  }
                 },
                 icon: const Icon(Icons.download, color: grey),
                 label: Text("Download Report".tr()),

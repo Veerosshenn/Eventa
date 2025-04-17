@@ -172,5 +172,7 @@
     "No revenue data available": "ไม่มีข้อมูลรายได้",
     "Occupied": "ถูกใช้งาน",
     "Vacant": "ว่าง",
-    "Revenue Overview": "ภาพรวมรายได้"
+    "Revenue Overview": "ภาพรวมรายได้",
+    "PDF generated successfully!": "สร้าง PDF สำเร็จ!",
+    "Error generating PDF:": "เกิดข้อผิดพลาดในการสร้าง PDF:"
 }
