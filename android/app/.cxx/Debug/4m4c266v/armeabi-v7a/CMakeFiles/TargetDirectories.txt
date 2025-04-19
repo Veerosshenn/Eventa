@@ -1,0 +1,2 @@
+C:/Users/veero/Documents/HELP/YEAR3/SEM2/BIT311/Eventa/Eventa/android/app/.cxx/Debug/4m4c266v/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/veero/Documents/HELP/YEAR3/SEM2/BIT311/Eventa/Eventa/android/app/.cxx/Debug/4m4c266v/armeabi-v7a/CMakeFiles/rebuild_cache.dir
