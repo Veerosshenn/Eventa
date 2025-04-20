@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 import 'package:flutter/services.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/widgets.dart' as pw;
-
 
 class OrganizerAnalyticsCalculations {
   Future<Map<String, dynamic>> fetchAnalyticsOrganizerScreen(String userId, String timeframe) async {
@@ -188,5 +190,13 @@ Future<void> generatePDF({
       ..click();
 
     html.Url.revokeObjectUrl(url);
+  } else {
+    // Works on Android, iOS, Desktop
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/organizer_analytics_report.pdf';
+    final file = File(filePath);
+
+    await file.writeAsBytes(pdfBytes);
+    await OpenFile.open(filePath);
   }
 }
