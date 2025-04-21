@@ -8,21 +8,31 @@ import 'home_admin.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class RegisterOrganizerScreen extends StatefulWidget {
-  const RegisterOrganizerScreen({super.key});
+  final FirebaseAuth? auth;
+  final FirebaseFirestore? firestore;
+
+  const RegisterOrganizerScreen({super.key, this.auth, this.firestore});
 
   @override
   _RegisterOrganizerScreenState createState() => _RegisterOrganizerScreenState();
 }
 
 class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late final FirebaseAuth _auth;
+  late final FirebaseFirestore _firestore;
 
   final TextEditingController fullNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController orgNameController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _auth = widget.auth ?? FirebaseAuth.instance;
+    _firestore = widget.firestore ?? FirebaseFirestore.instance;
+  }
+  
   void _showConfirmationDialog() {
     if (fullNameController.text.isEmpty ||
         emailController.text.isEmpty ||

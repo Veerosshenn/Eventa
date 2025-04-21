@@ -9,7 +9,9 @@ import 'package:easy_localization/easy_localization.dart';
 
 class CreateEventScreen extends StatefulWidget {
   final String userId;
-  const CreateEventScreen({super.key, required this.userId});
+  final FirebaseFirestore? firestore;
+  final FirebaseStorage? storage;
+  const CreateEventScreen({super.key, required this.userId, this.firestore, this.storage});
 
   @override
   _CreateEventScreenState createState() => _CreateEventScreenState();
@@ -22,8 +24,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final TextEditingController endTimeController = TextEditingController();
   final TextEditingController locationNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  final FirebaseStorage storage = FirebaseStorage.instance;
+  late FirebaseFirestore firestore;
+  late FirebaseStorage storage;
+
+  @override
+  void initState() {
+    super.initState();
+    firestore = widget.firestore ?? FirebaseFirestore.instance;
+    storage = widget.storage ?? FirebaseStorage.instance;
+  }
 
   Uint8List? uploadedFileBytes;
   String? uploadedFileName;
@@ -154,36 +163,57 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTextField('Event Name'.tr(), eventNameController),
-            const SizedBox(height: 12),
-            _buildDateTimeField('Select Date'.tr(), dateController, _selectDate),
-            const SizedBox(height: 12),
-            _buildDateTimeField(
-              "Start Time".tr(), 
-              startTimeController, 
-              (context) => _selectTime(context, true)
+            _buildTextField(
+              'Event Name'.tr(),
+              eventNameController,
+              key: const Key('event_name_field'),
             ),
             const SizedBox(height: 12),
             _buildDateTimeField(
-              "End Time".tr(), 
-              endTimeController, 
-              (context) => _selectTime(context, false)
+              'Select Date'.tr(),
+              dateController,
+              _selectDate,
+              key: const Key('event_date_field'),
             ),
             const SizedBox(height: 12),
-            _buildTextField('Location'.tr(), locationNameController),
+            _buildDateTimeField(
+              "Start Time".tr(),
+              startTimeController,
+              (context) => _selectTime(context, true),
+              key: const Key('event_start_time_field'),
+            ),
             const SizedBox(height: 12),
-            _buildTextField('Description'.tr(), descriptionController, maxLines: 3),
+            _buildDateTimeField(
+              "End Time".tr(),
+              endTimeController,
+              (context) => _selectTime(context, false),
+              key: const Key('event_end_time_field'),
+            ),
+            const SizedBox(height: 12),
+            _buildTextField(
+              'Location'.tr(),
+              locationNameController,
+              key: const Key('event_location_field'),
+            ),
+            const SizedBox(height: 12),
+            _buildTextField(
+              'Description'.tr(),
+              descriptionController,
+              maxLines: 3,
+              key: const Key('event_description_field'),
+            ),
             const SizedBox(height: 12),
             _buildFilePicker(),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
+                key: const Key('create_event_button'), // Important for test
                 onPressed: _createEvent,
                 icon: const Icon(Icons.event_available, color: grey),
                 label: Text("Create Event".tr()),
@@ -201,8 +231,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {int maxLines = 1}) {
+  Widget _buildTextField(String label, TextEditingController controller, {int maxLines = 1, Key? key}) {
     return TextField(
+      key: key,
       controller: controller,
       maxLines: maxLines,
       decoration: InputDecoration(
@@ -216,11 +247,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
   }
 
-  Widget _buildDateTimeField(String label, TextEditingController controller, Function(BuildContext) onTap) {
+  Widget _buildDateTimeField(String label, TextEditingController controller, Function(BuildContext) onTap, {Key? key}) {
     return InkWell(
       onTap: () => onTap(context),
       child: IgnorePointer(
         child: TextField(
+          key: key,
           controller: controller,
           decoration: InputDecoration(
             labelText: label,

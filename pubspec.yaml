@@ -54,12 +54,15 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   url_launcher: ^6.3.1
+  provider: ^6.1.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   google_fonts: ^4.0.4
   font_awesome_flutter: ^10.5.0
+  mockito: ^5.4.2
+  build_runner: ^2.4.8
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -109,3 +112,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+dependency_overrides:
+  analyzer: ^6.2.0
