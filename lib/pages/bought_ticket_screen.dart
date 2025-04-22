@@ -3,10 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
-class BoughtTicketScreen extends StatelessWidget {
-  const BoughtTicketScreen({Key? key}) : super(key: key);
+class BoughtTicketScreen extends StatefulWidget {
+  const BoughtTicketScreen({super.key});
 
+  @override
+  _BoughtTicketScreen createState() => _BoughtTicketScreen();
+}
+
+class _BoughtTicketScreen extends State<BoughtTicketScreen> {
   // Fetches the list of booked tickets for the current user
   Future<List<Map<String, dynamic>>> getBookedTickets() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -120,6 +126,8 @@ class BoughtTicketScreen extends StatelessWidget {
       Map<String, dynamic> ticket) {
     bool canCancel = event['startTime'] != null && event['startTime'] != '';
 
+    print("event ${ticket}");
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -127,7 +135,12 @@ class BoughtTicketScreen extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset("assets/images/qr_code.png", height: 150, width: 150),
+            SizedBox(
+                height: 200,
+                width: 200,
+                child: QrImageView(
+                  data: "${ticket['boughtTicketUID']}",
+                )),
             SizedBox(height: 20),
             Text("${"Event:".tr()} ${event['eventName'] ?? 'Unknown Event'}",
                 style: TextStyle(color: Colors.black)),

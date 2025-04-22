@@ -174,5 +174,8 @@
     "Vacant": "ว่าง",
     "Revenue Overview": "ภาพรวมรายได้",
     "PDF generated successfully!": "สร้าง PDF สำเร็จ!",
-    "Error generating PDF:": "เกิดข้อผิดพลาดในการสร้าง PDF:"
+    "Error generating PDF:": "เกิดข้อผิดพลาดในการสร้าง PDF:",
+    "Payment Failed": "การชำระเงินล้มเหลว",
+    "An error occurred while processing your payment.": "เกิดข้อผิดพลาดขณะประมวลผลการชำระเงินของคุณ",
+    "Card Details": "รายละเอียดบัตร"
 }

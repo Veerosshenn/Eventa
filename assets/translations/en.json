@@ -174,5 +174,8 @@
     "Vacant": "Vacant",
     "Revenue Overview": "Revenue Overview",
     "PDF generated successfully!": "PDF generated successfully!",
-    "Error generating PDF:": "Error generating PDF:"
+    "Error generating PDF:": "Error generating PDF:",
+    "Payment Failed": "Payment Failed",
+    "An error occurred while processing your payment.": "An error occurred while processing your payment.",
+    "Card Details": "Card Details"
 }

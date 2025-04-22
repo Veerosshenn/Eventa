@@ -174,5 +174,8 @@
     "Vacant": "空闲",
     "Revenue Overview": "收入概览",
     "PDF generated successfully!": "PDF生成成功！",
-    "Error generating PDF:": "生成PDF时出错："
+    "Error generating PDF:": "生成PDF时出错：",
+    "Payment Failed": "付款失败",
+    "An error occurred while processing your payment.": "处理您的付款时发生错误。",
+    "Card Details": "信用卡资料"
 }

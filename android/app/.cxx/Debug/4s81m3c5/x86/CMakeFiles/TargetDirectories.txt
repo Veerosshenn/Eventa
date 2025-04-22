@@ -1,0 +1,2 @@
+/Users/ej/bit301_assignment1/android/app/.cxx/Debug/4s81m3c5/x86/CMakeFiles/edit_cache.dir
+/Users/ej/bit301_assignment1/android/app/.cxx/Debug/4s81m3c5/x86/CMakeFiles/rebuild_cache.dir
