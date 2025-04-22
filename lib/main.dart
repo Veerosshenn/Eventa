@@ -1,3 +1,5 @@
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,8 +9,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey =
+      'pk_test_51RFh8rRRNxfyNkWbyBYdJmGEZ9VfdHo2FZuUxBitPW8d7fT7WVa3sNEZN45yZ0FHDrUp8y35QoH6Iz8BUNFt85SN00BwBxPS11';
   await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseAppCheck.instance
+      .activate(androidProvider: AndroidProvider.playIntegrity);
   runApp(
     EasyLocalization(
       supportedLocales: [Locale('en'), Locale('zh'), Locale('th')],

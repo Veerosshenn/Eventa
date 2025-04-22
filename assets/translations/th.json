@@ -166,5 +166,8 @@
     "Delete Event": "ลบอีเวนต์",
     "Are you sure you want to delete this event?": "คุณแน่ใจหรือไม่ว่าต้องการลบอีเวนต์นี้?",
     "Delete": "ลบ",
-    "Event Deleted Successfully!": "ลบอีเวนต์สำเร็จ!"
+    "Event Deleted Successfully!": "ลบอีเวนต์สำเร็จ!",
+    "Payment Failed": "การชำระเงินล้มเหลว",
+    "An error occurred while processing your payment.": "เกิดข้อผิดพลาดขณะประมวลผลการชำระเงินของคุณ",
+    "Card Details": "รายละเอียดบัตร"
 }

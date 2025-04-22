@@ -166,5 +166,8 @@
     "Delete Event": "Delete Event",
     "Are you sure you want to delete this event?": "Are you sure you want to delete this event?",
     "Delete": "Delete",
-    "Event Deleted Successfully!": "Event Deleted Successfully!"
+    "Event Deleted Successfully!": "Event Deleted Successfully!",
+    "Payment Failed": "Payment Failed",
+    "An error occurred while processing your payment.": "An error occurred while processing your payment.",
+    "Card Details": "Card Details"
 }
