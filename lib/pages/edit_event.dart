@@ -1,20 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'consts.dart';
 import 'edit_event_detail.dart'; 
 
 class EditEventScreen extends StatefulWidget {
   final String userId;
+  final FirebaseFirestore? firestore;
 
-  const EditEventScreen({Key? key, required this.userId}) : super(key: key);
+  const EditEventScreen({Key? key, required this.userId, this.firestore}) : super(key: key);
 
   @override
   _EditEventScreenState createState() => _EditEventScreenState();
 }
 
 class _EditEventScreenState extends State<EditEventScreen> {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  late FirebaseFirestore firestore;
+
+  @override
+  void initState() {
+    super.initState();
+    firestore = widget.firestore ?? FirebaseFirestore.instance;
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,11 +87,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
                               ClipRRect(
                                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                                 child: event['posterUrl'] != null && event['posterUrl']!.isNotEmpty
-                                    ? Image.network(
-                                        event['posterUrl'],
-                                        height: 100, // Reduced image height
+                                    ? CachedNetworkImage(
+                                        imageUrl: event['posterUrl'],
+                                        height: 100,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
+                                        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                        errorWidget: (context, url, error) => const Icon(Icons.broken_image, color: Colors.white70),
                                       )
                                     : Container(
                                         height: 80, // Reduced placeholder height
