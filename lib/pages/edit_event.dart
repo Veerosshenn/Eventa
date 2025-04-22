@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'consts.dart';
 import 'edit_event_detail.dart'; 
@@ -87,16 +86,20 @@ class _EditEventScreenState extends State<EditEventScreen> {
                               ClipRRect(
                                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                                 child: event['posterUrl'] != null && event['posterUrl']!.isNotEmpty
-                                    ? CachedNetworkImage(
-                                        imageUrl: event['posterUrl'],
+                                    ? Image.network(
+                                        event['posterUrl'],
                                         height: 100,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
-                                        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                                        errorWidget: (context, url, error) => const Icon(Icons.broken_image, color: Colors.white70),
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            const Icon(Icons.broken_image, color: Colors.white70),
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) return child;
+                                          return const Center(child: CircularProgressIndicator());
+                                        },
                                       )
                                     : Container(
-                                        height: 80, // Reduced placeholder height
+                                        height: 100,
                                         color: Colors.grey[700],
                                         child: const Icon(Icons.image, color: Colors.white70, size: 40),
                                       ),

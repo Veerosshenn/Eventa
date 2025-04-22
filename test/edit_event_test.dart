@@ -1,82 +1,122 @@
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:assignment1/pages/edit_event.dart'; // Your EditEventScreen
-import './edit_event_test.mocks.dart'; // Generated using build_runner
+import './edit_event_test.mocks.dart'; // Generated mocks using build_runner
 
-// Generate mocks for all Firestore-related classes
-@GenerateMocks([FirebaseFirestore, CollectionReference, Query, QuerySnapshot, QueryDocumentSnapshot])
+/// Custom HttpOverrides to mock all network calls (especially for CachedNetworkImage)
+class TestHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return _MockHttpClient();
+  }
+}
+
+/// Mock HttpClient that returns a dummy response
+class _MockHttpClient implements HttpClient {
+  @override
+  Future<HttpClientRequest> getUrl(Uri url) async => _MockHttpClientRequest();
+
+  // Other HttpClient methods can throw UnimplementedError if not needed
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _MockHttpClientRequest implements HttpClientRequest {
+  @override
+  Future<HttpClientResponse> close() async => _MockHttpClientResponse();
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _MockHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+  @override
+  int get statusCode => HttpStatus.ok;
+
+  @override
+  StreamSubscription<List<int>> listen(void Function(List<int>)? onData,
+      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+    return const Stream<List<int>>.empty().listen(onData,
+        onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+
+@GenerateMocks([
+  FirebaseFirestore,
+  CollectionReference,
+  Query,
+  QuerySnapshot,
+  QueryDocumentSnapshot,
+])
 
 void main() {
+  HttpOverrides.global = TestHttpOverrides(); // Set the custom HttpOverrides
   late MockFirebaseFirestore mockFirestore;
   late MockCollectionReference<Map<String, dynamic>> mockCollection;
   late MockQuery<Map<String, dynamic>> mockQuery;
   late MockQuerySnapshot<Map<String, dynamic>> mockSnapshot;
   late MockQueryDocumentSnapshot<Map<String, dynamic>> mockDocument;
+  late StreamController<QuerySnapshot<Map<String, dynamic>>> controller;
 
-  setUp(() async {
-    // Initialize all mocks
+  setUp(() {
     mockFirestore = MockFirebaseFirestore();
     mockCollection = MockCollectionReference<Map<String, dynamic>>();
-    mockQuery = MockQuery();
-    mockSnapshot = MockQuerySnapshot();
+    mockQuery = MockQuery<Map<String, dynamic>>();
+    mockSnapshot = MockQuerySnapshot<Map<String, dynamic>>();
     mockDocument = MockQueryDocumentSnapshot<Map<String, dynamic>>();
+    controller = StreamController<QuerySnapshot<Map<String, dynamic>>>();
 
-    // Mock the Firestore collection call
+    // Firestore setup
     when(mockFirestore.collection('events')).thenReturn(mockCollection);
-
-    // Mock the where clause to return a query
     when(mockCollection.where('createdBy', isEqualTo: anyNamed('isEqualTo')))
         .thenReturn(mockQuery);
-
-    // Mock the snapshots stream to return our mock snapshot
-    when(mockQuery.snapshots()).thenAnswer((_) => Stream.value(mockSnapshot));
-
-    // Mock the documents in the snapshot
+    when(mockQuery.snapshots()).thenAnswer((_) => controller.stream);
     when(mockSnapshot.docs).thenReturn([mockDocument]);
 
-    // Mock the data of the document for the event
+    // Mock event data
     when(mockDocument.data()).thenReturn({
       'eventName': 'Test Event',
       'date': '2025-04-21',
       'startTime': '10:00 AM',
       'posterUrl': 'poster.png',
     });
+
     when(mockDocument['eventName']).thenReturn('Test Event');
     when(mockDocument['date']).thenReturn('2025-04-21');
     when(mockDocument['startTime']).thenReturn('10:00 AM');
     when(mockDocument['posterUrl']).thenReturn('poster.png');
   });
 
-  testWidgets('EditEventScreen shows event grid for user', (WidgetTester tester) async {
-    // Mock CachedNetworkImage to avoid network call
-    final imageOverride = CachedNetworkImage(
-      imageUrl: 'poster.png',
-      imageBuilder: (context, imageProvider) => Container(), // Use a blank container
-      placeholder: (context, url) => const SizedBox(),
-      errorWidget: (context, url, error) => const Icon(Icons.error),
-    );
+  tearDown(() {
+    controller.close();
+  });
 
-    // Wrap the EditEventScreen widget in a MaterialApp
+  testWidgets('EditEventScreen shows event grid for user', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: EditEventScreen(userId: 'mockUserId', firestore: mockFirestore),
+        home: EditEventScreen(
+          userId: 'mockUserId',
+          firestore: mockFirestore,
+        ),
       ),
     );
 
-    await tester.pump(Duration(seconds: 2)); // Allow time for the stream to emit
+    // Emit the mocked snapshot to simulate Firestore response
+    controller.add(mockSnapshot);
 
-    // Allow the widget tree to settle
-    await tester.pumpAndSettle();
+    await tester.pump(); // trigger widget build
+    await tester.pumpAndSettle(); // wait for animations, stream to complete
 
-    // Verify that the event name, date, and start time are displayed
     expect(find.text('Test Event'), findsOneWidget);
     expect(find.text('2025-04-21 • 10:00 AM'), findsOneWidget);
-
-    // Verify that the event poster is loaded (mocked as a blank container)
-    expect(find.byType(CachedNetworkImage), findsOneWidget); // Adjust this check if necessary
   });
 }

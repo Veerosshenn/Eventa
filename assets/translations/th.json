@@ -177,5 +177,11 @@
     "Error generating PDF:": "เกิดข้อผิดพลาดในการสร้าง PDF:",
     "Payment Failed": "การชำระเงินล้มเหลว",
     "An error occurred while processing your payment.": "เกิดข้อผิดพลาดขณะประมวลผลการชำระเงินของคุณ",
-    "Card Details": "รายละเอียดบัตร"
+    "Card Details": "รายละเอียดบัตร",
+    "Scan QR": "สแกน QR",
+    "Ticket Details": "รายละเอียดตั๋ว",
+    "Ticket Not Found": "ตั๋วไม่พบ",
+    "No matching ticket was found.": "ไม่พบตั๋วที่ตรงกัน",
+    "Close": "ปิด",
+    "QR Code Scanner": "สแกน QR โค้ด"
 }
