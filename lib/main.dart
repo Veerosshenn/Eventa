@@ -13,6 +13,10 @@ void main() async {
       'pk_test_51RFh8rRRNxfyNkWbyBYdJmGEZ9VfdHo2FZuUxBitPW8d7fT7WVa3sNEZN45yZ0FHDrUp8y35QoH6Iz8BUNFt85SN00BwBxPS11';
   await EasyLocalization.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await FirebaseAppCheck.instance
+      .activate(androidProvider: AndroidProvider.playIntegrity);
+
   await FirebaseAppCheck.instance
       .activate(androidProvider: AndroidProvider.playIntegrity);
   runApp(

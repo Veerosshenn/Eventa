@@ -6,15 +6,22 @@ import 'edit_event_detail.dart';
 
 class EditEventScreen extends StatefulWidget {
   final String userId;
+  final FirebaseFirestore? firestore;
 
-  const EditEventScreen({Key? key, required this.userId}) : super(key: key);
+  const EditEventScreen({Key? key, required this.userId, this.firestore}) : super(key: key);
 
   @override
   _EditEventScreenState createState() => _EditEventScreenState();
 }
 
 class _EditEventScreenState extends State<EditEventScreen> {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  late FirebaseFirestore firestore;
+
+  @override
+  void initState() {
+    super.initState();
+    firestore = widget.firestore ?? FirebaseFirestore.instance;
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +67,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                       crossAxisCount: 2, // Two columns
                       crossAxisSpacing: 10,
                       mainAxisSpacing: 10,
-                      childAspectRatio: 1.2, // Adjusted height-to-width ratio
+                      childAspectRatio: 1.0, // Adjusted height-to-width ratio
                     ),
                     itemCount: userEvents.length,
                     itemBuilder: (context, index) {
@@ -81,12 +88,18 @@ class _EditEventScreenState extends State<EditEventScreen> {
                                 child: event['posterUrl'] != null && event['posterUrl']!.isNotEmpty
                                     ? Image.network(
                                         event['posterUrl'],
-                                        height: 100, // Reduced image height
+                                        height: 100,
                                         width: double.infinity,
                                         fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            const Icon(Icons.broken_image, color: Colors.white70),
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) return child;
+                                          return const Center(child: CircularProgressIndicator());
+                                        },
                                       )
                                     : Container(
-                                        height: 80, // Reduced placeholder height
+                                        height: 100,
                                         color: Colors.grey[700],
                                         child: const Icon(Icons.image, color: Colors.white70, size: 40),
                                       ),

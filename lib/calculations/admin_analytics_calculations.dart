@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:typed_data';
+import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
 import 'package:flutter/services.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/widgets.dart' as pw;
@@ -103,23 +106,38 @@ Future<void> generatePDF(
   pdf.addPage(
     pw.Page(
       build: (pw.Context context) {
-        return pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text("Analytics Report", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Text("Timeframe: $timeframe"),
-            pw.Text("Total Bookings: $totalBookings"),
-            pw.Text("Events Hosted: $eventsHosted"),
-            pw.Text("Utilization Rate: ${utilizationRate.toStringAsFixed(2)}%"),
-            pw.SizedBox(height: 10),
-            pw.Text("Events Hosted Over Time:"),
-            pw.Column(
-              children: eventsHostedOverTime.entries.map((e) {
-                return pw.Text("Month ${e.key + 1}: ${e.value} events");
-              }).toList(),
-            ),
-          ],
+        return pw.Padding(
+          padding: const pw.EdgeInsets.all(24),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text("Admin Analytics Report", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 20),
+              pw.Text("Timeframe: $timeframe", style: pw.TextStyle(fontSize: 14)),
+              pw.SizedBox(height: 10),
+              pw.Text("Summary", style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.Bullet(text: "Total Bookings: $totalBookings"),
+              pw.Bullet(text: "Events Hosted: $eventsHosted"),
+              pw.Bullet(text: "Utilization Rate: ${utilizationRate.toStringAsFixed(2)}%"),
+              pw.SizedBox(height: 20),
+              pw.Text("Monthly Events Breakdown", style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+              pw.SizedBox(height: 10),
+              pw.TableHelper.fromTextArray(
+                headers: ['Month', 'Number of Events'],
+                data: eventsHostedOverTime.entries.map((entry) {
+                  return [
+                    "Month ${entry.key + 1}",
+                    entry.value.toString(),
+                  ];
+                }).toList(),
+                border: pw.TableBorder.all(width: 0.5),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                cellAlignment: pw.Alignment.centerLeft,
+                cellPadding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+              ),
+            ],
+          ),
         );
       },
     ),
@@ -132,12 +150,19 @@ Future<void> generatePDF(
     // Web: Trigger file download
     final blob = html.Blob([pdfBytes]);
     final url = html.Url.createObjectUrlFromBlob(blob);
-    
-    // Create an invisible anchor element and trigger the download
+
     html.AnchorElement(href: url)
-      ..setAttribute("download", "analytics_report.pdf")
+      ..setAttribute("download", "admin_analytics_report.pdf")
       ..click();
 
     html.Url.revokeObjectUrl(url);
+  } else {
+    // Works on Android, iOS, Desktop
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/organizer_analytics_report.pdf';
+    final file = File(filePath);
+
+    await file.writeAsBytes(pdfBytes);
+    await OpenFile.open(filePath);
   }
 }

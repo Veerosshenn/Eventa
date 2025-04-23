@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   fl_chart: ^0.70.2
   http: ^1.2.0
-  flutter_stripe: ^10.0.0
+  flutter_stripe: ^11.5.0
   cloud_functions: ^5.3.4
   intl: 0.19.0
   file_picker: ^9.0.0
@@ -49,23 +49,32 @@ dependencies:
   google_sign_in_web: ^0.12.4+4
   firebase_storage: ^12.4.4
   pdf: ^3.10.7
-  path_provider: ^2.1.2
+  path_provider: ^2.1.5
   permission_handler: ^11.0.1
-  open_file: ^3.3.2
+  open_file: ^3.5.10
   universal_html: ^2.2.4
   easy_localization: ^3.0.7+1
   flutter_localizations:
     sdk: flutter
-  webview_flutter: ^4.11.0
+  url_launcher: ^6.3.1
+  provider: ^6.1.4
   firebase_app_check: ^0.3.2+5
+  cached_network_image: ^3.4.1
+  mobile_scanner: ^6.0.10
+  webview_flutter: ^4.11.0
   qr_flutter: ^4.1.0
   uuid: ^4.0.0
+  firebase_auth_mocks: ^0.14.0
+  firebase_core_platform_interface: ^5.4.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   google_fonts: ^4.0.4
   font_awesome_flutter: ^10.5.0
+  mockito: ^5.4.2
+  build_runner: ^2.4.8
+  mocktail: ^1.0.4
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -115,3 +124,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+dependency_overrides:
+  analyzer: ^6.2.0

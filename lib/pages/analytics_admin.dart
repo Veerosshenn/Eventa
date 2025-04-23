@@ -106,7 +106,22 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  await generatePDF(selectedTimeframe, _totalBookings, _eventsHosted, _utilizationRate, _eventsHostedOverTime);
+                  try {
+                    await generatePDF(
+                      selectedTimeframe, 
+                      _totalBookings, 
+                      _eventsHosted, 
+                      _utilizationRate, 
+                      _eventsHostedOverTime
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("PDF generated successfully!".tr())),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error generating PDF: $e".tr())),
+                    );
+                  }
                 },
                 icon: const Icon(Icons.download, color: grey),
                 label: Text("Download Report".tr()),

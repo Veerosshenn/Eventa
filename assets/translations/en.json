@@ -167,7 +167,21 @@
     "Are you sure you want to delete this event?": "Are you sure you want to delete this event?",
     "Delete": "Delete",
     "Event Deleted Successfully!": "Event Deleted Successfully!",
+    "Organizer Analytics": "Organizer Analytics",
+    "Tickets Sold": "Tickets Sold",
+    "No revenue data available": "No revenue data available",
+    "Occupied": "Occupied",
+    "Vacant": "Vacant",
+    "Revenue Overview": "Revenue Overview",
+    "PDF generated successfully!": "PDF generated successfully!",
+    "Error generating PDF:": "Error generating PDF:",
     "Payment Failed": "Payment Failed",
     "An error occurred while processing your payment.": "An error occurred while processing your payment.",
-    "Card Details": "Card Details"
+    "Card Details": "Card Details",
+    "Scan QR": "Scan QR",
+    "Ticket Details": "Ticket Details",
+    "Ticket Not Found": "Ticket Not Found",
+    "No matching ticket was found.": "No matching ticket was found.",
+    "Close": "Close",
+    "QR Code Scanner": "QR Code Scanner"
 }

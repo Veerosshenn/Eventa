@@ -3,11 +3,29 @@ import '../Widget/event_info.dart';
 import 'consts.dart';
 import 'ticket_booking_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailScreen extends StatelessWidget {
   final Map<String, dynamic> eventData;
 
   const EventDetailScreen({super.key, required this.eventData});
+
+  
+  Future<void> openMapWithLocation(String location) async {
+    final Uri googleMapsUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}');
+
+    // Try external app first
+    final launched = await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+
+    if (!launched) {
+      // Fallback: Try opening in browser view
+      final fallbackLaunched = await launchUrl(googleMapsUrl, mode: LaunchMode.inAppBrowserView);
+
+      if (!fallbackLaunched) {
+        throw 'Could not open the map for $location';
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +68,15 @@ class EventDetailScreen extends StatelessWidget {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        EventInfo(
-                          icon: Icons.location_on,
-                          name: "Location".tr(),
-                          value: eventData['location'],
+                        GestureDetector(
+                          onTap: () {
+                            openMapWithLocation(eventData['location']);
+                          },
+                          child: EventInfo(
+                            icon: Icons.location_on,
+                            name: "Location".tr(),
+                            value: eventData['location'],
+                          ),
                         ),
                         EventInfo(
                           icon: Icons.lock_clock,

@@ -24,13 +24,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
 
   void showError(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.red,
-            )
-          );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+    ));
   }
 
   Future<void> _registerUser() async {
@@ -50,7 +47,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       // Create user in Firebase Auth
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -97,7 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: grey),
-          onPressed: () => Navigator.pop(context), 
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Padding(
@@ -105,10 +103,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              _buildCustomTextField(emailController, "Email".tr()),
-              _buildCustomTextField(nameController, "Name".tr()),
-              _buildCustomTextField(phoneController, "Phone Number".tr(), TextInputType.phone),
-              _buildCustomTextField(passwordController, "Password".tr(), TextInputType.visiblePassword, true),
+              _buildCustomTextField(
+                  emailController, "Email".tr(), Key('emailField')),
+              _buildCustomTextField(
+                  nameController, "Name".tr(), Key('nameField')),
+              _buildCustomTextField(phoneController, "Phone Number".tr(),
+                  Key('phoneField'), TextInputType.phone),
+              _buildCustomTextField(passwordController, "Password".tr(),
+                  Key('passwordField'), TextInputType.visiblePassword, true),
               const SizedBox(height: 25),
               ElevatedButton(
                 onPressed: _isLoading ? null : _registerUser,
@@ -117,13 +119,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 25),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 25),
                 ),
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         "Register".tr(),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.black),
                       ),
               ),
               const SizedBox(height: 15),
@@ -143,12 +149,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildCustomTextField(TextEditingController controller, String label,
-      [TextInputType keyboardType = TextInputType.text, bool isObscure = false]) {
+  Widget _buildCustomTextField(
+      TextEditingController controller, String label, Key fieldKey,
+      [TextInputType keyboardType = TextInputType.text,
+      bool isObscure = false]) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 15),
       child: TextField(
         controller: controller,
+        key: fieldKey,
         keyboardType: keyboardType,
         obscureText: isObscure,
         style: const TextStyle(color: Colors.white),

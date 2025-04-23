@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                               child: Padding(
                                 padding: EdgeInsets.only(
-                                    top: 100 - (scale / 1.6 * 100)),
+                                    top: 70 - (scale / 1.6 * 100)),
                                 child: Stack(
                                   alignment: Alignment.topCenter,
                                   children: [
@@ -155,8 +155,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                               BorderRadius.circular(25),
                                           child: Image.network(
                                             event['posterUrl'],
-                                            height: 400,
-                                            width: 300,
+                                            height: 325,
+                                            width: 225,
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                         Positioned(
-                          top: 500,
+                          top: 350,
                           child: Row(
                             children: List.generate(
                               events.length,
@@ -233,15 +233,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 5),
-                  Text(
-                    "hello_user".tr(namedArgs: {'userName': userName}),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1,
-                      color: Colors.white54,
-                    ),
-                  ),
+                  isUserNameFetched
+                      ? Text(
+                          "hello_user".tr(namedArgs: {'userName': userName}),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            letterSpacing: 1,
+                            color: Colors.white54,
+                          ),
+                        )
+                      : const CircularProgressIndicator(),
                   const SizedBox(height: 5),
                   Text(
                     "Relax, book your tickets, and enjoy the events!".tr(),

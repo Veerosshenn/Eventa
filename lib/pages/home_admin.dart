@@ -1,3 +1,5 @@
+import 'package:assignment1/pages/qr_admin.dart';
+
 import 'consts.dart';
 import 'package:flutter/material.dart';
 import 'register_organizer.dart';
@@ -63,6 +65,12 @@ class HomeAdmin extends StatelessWidget {
                     title: 'View Analytics'.tr(),
                     icon: Icons.bar_chart,
                     screen: const AnalyticsScreen(),
+                  ),
+                  _buildCard(
+                    context,
+                    title: 'Scan QR'.tr(),
+                    icon: Icons.qr_code_scanner,
+                    screen: const QrAdmin(),
                   ),
                 ],
               ),

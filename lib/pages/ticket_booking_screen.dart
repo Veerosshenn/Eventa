@@ -215,8 +215,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          height: 25,
-                          width: 25,
+                          height: 20,
+                          width: 20,
                           decoration: BoxDecoration(
                             color: buttonColor,
                             borderRadius: BorderRadius.circular(7.5),
@@ -228,8 +228,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 fontSize: 12, color: Colors.white)),
                         const SizedBox(width: 5),
                         Container(
-                          height: 25,
-                          width: 25,
+                          height: 20,
+                          width: 20,
                           decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(7.5),
@@ -241,8 +241,8 @@ class _TicketBookingScreenState extends State<TicketBookingScreen> {
                                 fontSize: 12, color: Colors.white)),
                         const SizedBox(width: 5),
                         Container(
-                          height: 25,
-                          width: 25,
+                          height: 20,
+                          width: 20,
                           decoration: BoxDecoration(
                             color: grey,
                             borderRadius: BorderRadius.circular(7.5),
