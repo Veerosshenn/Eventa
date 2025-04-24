@@ -159,7 +159,7 @@ Future<void> generatePDF(
   } else {
     // Works on Android, iOS, Desktop
     final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/organizer_analytics_report.pdf';
+    final filePath = '${directory.path}/admin_analytics_report.pdf';
     final file = File(filePath);
 
     await file.writeAsBytes(pdfBytes);
