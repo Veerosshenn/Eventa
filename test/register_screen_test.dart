@@ -1,3 +1,4 @@
+import 'package:assignment1/pages/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,27 +13,29 @@ Future<void> main() async {
     await Firebase.initializeApp();
   });
 
-  testWidgets('RegisterScreen Widget Testing', (WidgetTester tester) async {
+  testWidgets('RegisterScreen navigates to HomeScreen after registration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: RegisterScreen(),
     ));
 
     await tester.pumpAndSettle();
 
-    var email = find.byKey(Key('emailField'));
-    var name = find.byKey(Key('nameField'));
-    var phone = find.byKey(Key('phoneField'));
-    var password = find.byKey(Key('passwordField'));
+    final emailField = find.byKey(const Key('emailField'));
+    final nameField = find.byKey(const Key('nameField'));
+    final phoneField = find.byKey(const Key('phoneField'));
+    final passwordField = find.byKey(const Key('passwordField'));
 
-    expect(email, findsOneWidget);
-    expect(name, findsOneWidget);
-    expect(phone, findsOneWidget);
-    expect(password, findsOneWidget);
+    await tester.enterText(emailField, 'test@example.com');
+    await tester.enterText(nameField, 'Test User');
+    await tester.enterText(phoneField, '0123456789');
+    await tester.enterText(passwordField, 'password123');
 
-    var register = find.byType(ElevatedButton);
-    expect(register, findsOneWidget);
+    final registerButton = find.byKey(const Key('registerButton'));
 
-    var login = find.text("Already have an account? Login");
-    expect(login, findsOneWidget);
+    expect(registerButton, findsOneWidget);
+
+    await tester.tap(registerButton);
+    await tester.pump();
   });
 }

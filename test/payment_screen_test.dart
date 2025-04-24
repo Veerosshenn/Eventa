@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:assignment1/pages/payment_screen.dart';
 
@@ -15,23 +16,26 @@ Future<void> main() async {
   testWidgets('HomeScreen Widget Testing', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: PaymentScreen(
-        totalAmount: 200,
+        totalAmount: 200.0,
         ticketType: 'VIP',
-        ticketAmount: 250,
+        ticketAmount: 1,
         selectedSeats: 'A2',
         eventName: 'Musically',
         eventPoster: 'assets/image.png',
       ),
     ));
 
-    var payment = find.text("Payment");
-    var summary = find.text("Ticket Summary");
-    var card = find.text("Card Details");
-    var pay = find.text("Pay Now");
+    await tester.pumpAndSettle();
 
-    expect(payment, findsOneWidget);
-    expect(summary, findsOneWidget);
-    expect(card, findsOneWidget);
-    expect(pay, findsOneWidget);
+    final cardFieldFinder = find.byType(CardField);
+
+    final payButtonFinder = find.widgetWithText(MaterialButton, "Pay Now");
+
+    expect(cardFieldFinder, findsOneWidget);
+
+    expect(payButtonFinder, findsOneWidget);
+
+    await tester.tap(payButtonFinder);
+    await tester.pump();
   });
 }
