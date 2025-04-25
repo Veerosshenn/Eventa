@@ -89,7 +89,7 @@ class _RegisterOrganizerScreenState extends State<RegisterOrganizerScreen> {
       String uid = userCredential.user!.uid;
 
       await _firestore.collection('users').doc(uid).set({
-        'fullName': fullNameController.text.trim(),
+        'name': fullNameController.text.trim(),
         
         'email': emailController.text.trim(),
         'phone': phoneController.text.trim(),
